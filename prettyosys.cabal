@@ -31,7 +31,7 @@ executable prettyosys
                    Parsers.TextParser,
                    Parsers.FileExtensions.Base,
                    Parsers.FileExtensions.VHDL,
-                   Parsers.FileExtensions.VU
+                   Parsers.FileExtensions.PSL
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
