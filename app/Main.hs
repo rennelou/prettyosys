@@ -4,6 +4,7 @@ import Verify
 import Cli
 import FolderSearch
 import Parsers.FileExtensions.VHDL
+import Parsers.FileExtensions.VU
 
 import System.Process
 import Text.Printf
@@ -18,8 +19,8 @@ createSby :: Args -> IO String
 createSby args = do
     (srcFiles, srcPaths) <- getFilesAndPaths "src"
     (testFiles, testPaths) <- getFilesAndPaths "verification_units"
-    let files = intercalate " " $ filterVHDLExtension (srcFiles ++ testFiles)
-    let paths = intercalate "\n" $ filterVHDLExtension (srcPaths ++ testPaths)
+    let files = intercalate " " $ (filterVHDLExtension srcFiles) ++ (filterVUExtension testFiles)
+    let paths = intercalate "\n" $ (filterVHDLExtension srcPaths) ++ (filterVUExtension testPaths)
     return ( printf "echo \"%s\" | %s" 
                 (sbyConfig (getDepht args) files topLevel paths)
                 (sbyCommand (getMode args) (getBackupFlag args) (getWorkDir args) topLevel) )

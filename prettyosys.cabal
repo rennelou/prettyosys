@@ -30,7 +30,8 @@ executable prettyosys
                    FolderSearch,
                    Parsers.TextParser,
                    Parsers.FileExtensions.Base,
-                   Parsers.FileExtensions.VHDL
+                   Parsers.FileExtensions.VHDL,
+                   Parsers.FileExtensions.VU
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:

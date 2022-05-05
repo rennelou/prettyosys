@@ -1,5 +1,6 @@
 module Parsers.FileExtensions.VHDL (
-    filterVHDLExtension
+    filterVHDLExtension,
+    parserVHDL
 ) where
 
 import Parsers.TextParser
@@ -10,4 +11,6 @@ filterVHDLExtension :: [String] -> [String]
 filterVHDLExtension = filterExtension parserVHDL
 
 parserVHDL :: TextParser String
-parserVHDL = try (parserExtension ".vhd") <|> collapseAll
+parserVHDL = try (parserExtension ".vhd") 
+             <|> try (parserExtension ".vhdl") 
+             <|> collapseAll
