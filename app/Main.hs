@@ -3,7 +3,7 @@ module Main where
 import Verify
 import Cli
 import FolderSearch
-import Parsers.VHDL.Extension
+import Parsers.FileExtensions.VHDL
 
 import System.Process
 import Text.Printf

@@ -1,8 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 
-module Parsers.VHDL.Extension (
-    filterVHDLExtension
+module Parsers.FileExtensions.Base (
+    filterExtension,
+    parserExtension,
+    collapseAll
 ) where
 
 import Control.Applicative
@@ -17,19 +19,16 @@ import qualified Text.Megaparsec.Char.Lexer as L
 import qualified Text.Megaparsec as M
 import Parsers.TextParser
 
-filterVHDLExtension :: [String] -> [String]
-filterVHDLExtension = (catMaybes . (map ((parseMaybe (parseVHDLOrEmpty <* eof)) . T.pack)))
+filterExtension :: TextParser String -> [String] -> [String]
+filterExtension extensionParser = catMaybes.(map ((parseMaybe (extensionParser <* eof)).T.pack))
 
-parseVHDLOrEmpty :: TextParser String
-parseVHDLOrEmpty = try parserVHDL <|> collapseNotVHDL
-
-parserVHDL :: TextParser String
-parserVHDL = do
+parserExtension :: String -> TextParser String
+parserExtension extension = do
     name <- M.some (alphaNumChar <|> char '_' <|> char '/')
-    vhdExtension <- T.unpack <$> string ".vhd"
+    vhdExtension <- T.unpack <$> string (T.pack extension)
     return (name ++ vhdExtension)
 
-collapseNotVHDL :: TextParser String
-collapseNotVHDL = do
+collapseAll :: TextParser String
+collapseAll = do
     void (M.some alphaNumChar)
     return ""

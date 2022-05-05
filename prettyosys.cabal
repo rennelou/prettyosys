@@ -29,7 +29,8 @@ executable prettyosys
                    Cli,
                    FolderSearch,
                    Parsers.TextParser,
-                   Parsers.VHDL.Extension
+                   Parsers.FileExtensions.Base,
+                   Parsers.FileExtensions.VHDL
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
