@@ -1,4 +1,4 @@
-module Sby (
+module Verify (
     Mode(..),
     sbyConfig,
     sbyCommand,
@@ -22,11 +22,11 @@ module Sby (
     sbyBackupFlag True = "-b"
 
     sbyConfig :: Int -> String -> String -> String -> String
-    sbyConfig depht fileNames topLevel files = 
+    sbyConfig depht files topLevel paths = 
         (sbyTasksConfig depht) ++
         sbyEngineConfig ++
-        (sbyScriptsConfig fileNames topLevel) ++
-        (sbyFilesConfig files)
+        (sbyScriptsConfig files topLevel) ++
+        (sbyFilesConfig paths)
 
     sbyTasksConfig :: Int -> String
     sbyTasksConfig depth =
@@ -45,9 +45,9 @@ module Sby (
         "smtbmc\n"
 
     sbyScriptsConfig :: String -> String -> String
-    sbyScriptsConfig fileNames topLevel =
+    sbyScriptsConfig paths topLevel =
         "[script]\n" ++
-        (printf "ghdl --std=08 %s -e %s\n" fileNames topLevel) ++
+        (printf "ghdl --std=08 %s -e %s\n" paths topLevel) ++
         (printf "prep -top %s\n" topLevel)
 
     sbyFilesConfig :: String -> String

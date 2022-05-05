@@ -25,15 +25,21 @@ executable prettyosys
     main-is:          Main.hs
 
     -- Modules included in this executable, other than Main.
-    other-modules: Sby, Cli, SearchVHDLFiles
+    other-modules: Verify,
+                   Cli,
+                   FolderSearch,
+                   Parsers.TextParser,
+                   Parsers.VHDL.Extension
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
     build-depends:    base ^>=4.14.3.0,
                       directory ^>=1.3.6.0,
                       filepath ^>=1.4.2.1,
+                      text ^>=1.2.4.1,
                       process,
-                      optparse-applicative
+                      optparse-applicative,
+                      megaparsec
     
     hs-source-dirs:   app
     default-language: Haskell2010

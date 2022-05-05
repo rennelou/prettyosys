@@ -3,7 +3,7 @@ module Cli (
     getCliOptions
 ) where
 
-import Sby
+import Verify
 import Options.Applicative
 
 data Args = Args {

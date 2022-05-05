@@ -1,18 +1,13 @@
-module SearchVHDLFiles (
+module FolderSearch (
     getFilesAndPaths
 ) where
 
 import System.Directory
 import System.FilePath
 import Control.Monad
-import Data.List
 
-getFilesAndPaths :: IO (String, String)
-getFilesAndPaths = do
-    srcs <- getRecursiveContents "src"
-    tests <- getRecursiveContents "verification_units"
-    let (files, paths) = unzip $ tests ++ srcs
-    return (intercalate " " files, intercalate "\n" paths)
+getFilesAndPaths :: FilePath -> IO ([FilePath], [FilePath])
+getFilesAndPaths rootDir = (getRecursiveContents rootDir) >>= return.unzip  
 
 getRecursiveContents :: FilePath -> IO [(FilePath,FilePath)]
 getRecursiveContents topDir = do
