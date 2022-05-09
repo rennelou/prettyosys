@@ -7,7 +7,6 @@ module Parsers.FileExtensions.Base (
     collapseAll
 ) where
 
-import Control.Applicative
 import Control.Monad
 import Data.Maybe
 import Data.Text (Text)

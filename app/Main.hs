@@ -3,17 +3,22 @@ module Main where
 import Verify
 import Cli
 import FolderSearch
+import Parsers.PSL
 import Parsers.FileExtensions.VHDL
 import Parsers.FileExtensions.PSL
 
+import System.IO
 import System.Process
 import Text.Printf
 import Data.List
+import Text.Megaparsec hiding (State)
+import qualified Data.Text as T
 
 topLevel = "sorted_list"
 
 main :: IO ()
-main = getCliOptions >>= createSby >>= callCommand
+--main = getCliOptions >>= createSby >>= callCommand
+main = readFile "verification_units/vunit_sorted_list.psl" >>= (parseTest pPSL) . T.pack
 
 createSby :: Args -> IO String
 createSby args = do

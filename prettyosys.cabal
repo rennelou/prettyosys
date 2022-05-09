@@ -29,6 +29,7 @@ executable prettyosys
                    Cli,
                    FolderSearch,
                    Parsers.TextParser,
+                   Parsers.PSL,
                    Parsers.FileExtensions.Base,
                    Parsers.FileExtensions.VHDL,
                    Parsers.FileExtensions.PSL
