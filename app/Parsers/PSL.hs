@@ -3,6 +3,7 @@
 
 module Parsers.PSL (
     PSLFile(..),
+    getTopLevel,
     VunitType(..),
     pPSL
 ) where
@@ -27,6 +28,9 @@ data PSLFile = PSLFile {
 } deriving(Show)
 
 data VunitType = VUnit | VProp | VMode deriving(Show)
+
+getTopLevel :: PSLFile -> String
+getTopLevel psl = fst $ hdl psl
 
 pPSL :: TextParser PSLFile
 pPSL = do
