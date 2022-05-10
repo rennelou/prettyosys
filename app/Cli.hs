@@ -1,12 +1,9 @@
 module Cli (
     Args(..),
-    getCliOptions,
-    getSbyCommandArgs,
-    getSbyConfigArgs
+    getCliOptions
 ) where
 
 import Verify.SbyCommand
-import Verify.SbyConfigFile.SbyConfigFile
 import Options.Applicative
 
 data Args = Args {
@@ -14,14 +11,6 @@ data Args = Args {
     getBackupFlag :: Bool,
     getWorkDir :: String,
     getDepht :: Int } deriving (Show);
-
-getSbyCommandArgs :: Args -> SbyCommandArgs
-getSbyCommandArgs Args{getMode=mode, getBackupFlag=backup, getWorkDir=workDir, getDepht=_} = 
-    SbyCommandArgs mode backup workDir
-
-getSbyConfigArgs :: Args -> SbyConfigArgs
-getSbyConfigArgs Args{getMode=_, getBackupFlag=_, getWorkDir=_, getDepht=depht'} =
-    SbyConfigArgs depht'
 
 getCliOptions :: IO Args
 getCliOptions = execParser opts
