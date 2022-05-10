@@ -14,12 +14,11 @@ module Verify.SbyCommand (
 
     data Mode = CoverProve | Cover | Prove deriving (Read, Show);
 
-    sbyCommandWithConfigFile :: SbyCommandArgs -> SbyConfigFile -> IO String
-    sbyCommandWithConfigFile commandArgs sbyConfigFile = do
-        return ( printf "echo \"%s\" | %s" 
-                    (show sbyConfigFile)
-                    (sbyCommand commandArgs (topLevel sbyConfigFile) )
-                )
+    sbyCommandWithConfigFile :: SbyCommandArgs -> SbyConfigFile -> String
+    sbyCommandWithConfigFile commandArgs sbyConfigFile =
+        printf "echo \"%s\" | %s" 
+            (show sbyConfigFile)
+            (sbyCommand commandArgs (topLevel sbyConfigFile) )
 
     sbyCommand :: SbyCommandArgs -> String -> String
     sbyCommand SbyCommandArgs{mode=mode, hasBackup=hasBackup, workdir=workdir} = 

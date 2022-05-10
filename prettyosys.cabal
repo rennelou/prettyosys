@@ -42,9 +42,12 @@ executable prettyosys
                       directory ^>=1.3.6.0,
                       filepath ^>=1.4.2.1,
                       text ^>=1.2.4.1,
-                      process,
+                      typed-process,
+                      bytestring ^>=0.10.12.0,
+                      stm ^>=2.5.0.1,
                       optparse-applicative,
                       megaparsec
     
     hs-source-dirs:   app
     default-language: Haskell2010
+    ghc-options: -threaded
