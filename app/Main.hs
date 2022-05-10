@@ -38,7 +38,6 @@ getCreateCommand = sbyCommandWithConfigFile.getSbyCommandArgs
         getSbyCommandArgs Args{getMode=mode, getBackupFlag=backup, getWorkDir=workDir, getDepht=_} = 
             SbyCommandArgs mode backup workDir
 
-
 getCreateSbyConfigFiles :: Args -> String -> String -> IO [SbyConfigFile]
 getCreateSbyConfigFiles = getSbyConfigFiles . getSbyConfigArgs
     where

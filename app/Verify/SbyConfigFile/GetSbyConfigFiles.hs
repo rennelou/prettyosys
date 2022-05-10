@@ -3,7 +3,7 @@ module Verify.SbyConfigFile.GetSbyConfigFiles (
 ) where
 
 import Verify.SbyConfigFile.SbyConfigFile
-import FolderSearch
+import Utils.FolderSearch
 import Parsers.PSL
 import Parsers.FileExtensions.VHDL
 import Parsers.FileExtensions.PSL

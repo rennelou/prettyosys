@@ -1,4 +1,4 @@
-module FolderSearch (
+module Utils.FolderSearch (
     getFilesAndPaths
 ) where
 
