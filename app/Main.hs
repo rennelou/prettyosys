@@ -7,6 +7,10 @@ import Verify.SbyCommand
 import Verify.SbyConfigFile.SbyConfigFile
 import Verify.SbyConfigFile.GetSbyConfigFiles
 
+import Parsers.SbyLog
+import Text.Megaparsec hiding (State)
+import qualified Data.Text as T
+
 import System.IO
 import System.Exit (ExitCode)
 import System.Process.Typed
@@ -14,7 +18,10 @@ import qualified Data.ByteString.Lazy.Char8 as L8
 import Control.Concurrent.STM (atomically)
 
 main :: IO ()
-main = do
+main = readFile "verify_build/qty_elements_tracker_cover/logfile.txt" >>= (parseTest pSbyLogLine).T.pack
+
+verifyAll :: IO ()
+verifyAll = do
     args <- getCliOptions
     
     let createSbyConfigFiles = getCreateSbyConfigFiles args

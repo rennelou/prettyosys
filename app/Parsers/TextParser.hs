@@ -8,6 +8,8 @@ module Parsers.TextParser (
     pCharsc,
     pWord,
     pKeyword,
+    integer,
+    pPath,
     pBlock
 ) where
 
@@ -43,6 +45,12 @@ pWord = T.pack <$> lexeme (M.some (alphaNumChar <|> char '_') )
 
 pKeyword :: Text -> TextParser Text
 pKeyword keyword = lexeme (string keyword <* notFollowedBy alphaNumChar)
+
+integer :: TextParser Integer
+integer = lexeme L.decimal
+
+pPath :: TextParser Text
+pPath = T.pack <$> lexeme (M.some (alphaNumChar <|> char '_' <|> char '-' <|> char '.' <|> char '/' ) )
 
 pBlock :: Char -> Char -> TextParser a -> TextParser a
 pBlock init end p = do

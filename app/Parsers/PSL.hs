@@ -19,8 +19,6 @@ import qualified Text.Megaparsec.Char.Lexer as L
 import qualified Text.Megaparsec as M
 import Parsers.TextParser
 
-import Text.Megaparsec.Debug
-
 data PSLFile = PSLFile {
     vunitType   :: VunitType,
     unitName    :: String,
