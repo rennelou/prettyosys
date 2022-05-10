@@ -1,17 +1,27 @@
 module Cli (
     Args(..),
-    getCliOptions
+    getCliOptions,
+    getSbyCommandArgs,
+    getSbyConfigArgs
 ) where
 
-import Verify
+import Verify.SbyCommand
+import Verify.SbyConfigFile.SbyConfigFile
 import Options.Applicative
 
 data Args = Args {
     getMode :: Mode,
+    getBackupFlag :: Bool,
     getWorkDir :: String,
-    getDepht :: Int,
-    getBackupFlag :: Bool
-} deriving (Show);
+    getDepht :: Int } deriving (Show);
+
+getSbyCommandArgs :: Args -> SbyCommandArgs
+getSbyCommandArgs Args{getMode=mode, getBackupFlag=backup, getWorkDir=workDir, getDepht=_} = 
+    SbyCommandArgs mode backup workDir
+
+getSbyConfigArgs :: Args -> SbyConfigArgs
+getSbyConfigArgs Args{getMode=_, getBackupFlag=_, getWorkDir=_, getDepht=depht'} =
+    SbyConfigArgs depht'
 
 getCliOptions :: IO Args
 getCliOptions = execParser opts
@@ -23,7 +33,7 @@ opts = info (parseArgs <**> helper)
     <> header "hard-to-prove - Pretty Formal Verification Cli Tool" )
 
 parseArgs :: Parser Args
-parseArgs = Args <$> parseMode <*> paseWorkDir <*> parseDepht <*> parseBackupFlag
+parseArgs = Args <$> parseMode <*> parseBackupFlag <*> paseWorkDir <*> parseDepht
 
 parseMode :: Parser Mode
 parseMode = option auto

@@ -25,9 +25,11 @@ executable prettyosys
     main-is:          Main.hs
 
     -- Modules included in this executable, other than Main.
-    other-modules: Verify,
-                   Cli,
+    other-modules: Cli,
                    FolderSearch,
+                   Verify.SbyCommand,
+                   Verify.SbyConfigFile.SbyConfigFile,
+                   Verify.SbyConfigFile.GetSbyConfigFiles,
                    Parsers.TextParser,
                    Parsers.PSL,
                    Parsers.FileExtensions.Base,
