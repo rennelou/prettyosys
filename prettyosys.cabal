@@ -34,7 +34,9 @@ executable prettyosys
                    Parsers.FileExtensions.Base,
                    Parsers.FileExtensions.VHDL,
                    Parsers.FileExtensions.PSL,
-                   Parsers.SbyLog,
+                   Parsers.SbyLog.SbyLog,
+                   Parsers.SbyLog.SbyCommand,
+                   Parsers.SbyLog.SbyLogUtils,
                    Utils.FolderSearch
 
     -- LANGUAGE extensions used by modules in this package.

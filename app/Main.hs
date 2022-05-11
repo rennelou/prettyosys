@@ -7,7 +7,7 @@ import Verify.SbyCommand
 import Verify.SbyConfigFile.SbyConfigFile
 import Verify.SbyConfigFile.GetSbyConfigFiles
 
-import Parsers.SbyLog
+import Parsers.SbyLog.SbyLog
 import Text.Megaparsec hiding (State)
 import qualified Data.Text as T
 

@@ -1,10 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 
-module Parsers.SbyLog (
-    pSbyLog
+module Parsers.SbyLog.SbyCommand (
+    SbyCommand(..),
+    pSbyCommand
 ) where
 
+import Parsers.SbyLog.SbyLogUtils
 import Control.Monad
 import Data.Maybe
 import Data.Text (Text)
@@ -16,12 +18,7 @@ import qualified Text.Megaparsec.Char.Lexer as L
 import qualified Text.Megaparsec as M
 import Parsers.TextParser
 
-data SbyLogLine = SbyLogLine {
-    taskPath    :: String,
-    cmd         :: LogType
-} deriving (Show)
-
-data LogType =
+data SbyCommand =
       Moving   { movingFrom :: String, movingTo :: String }
     | Copy     { copingFrom :: String, copingTo :: String } 
     | CreateEngine String
@@ -31,29 +28,21 @@ data LogType =
     | SMT2DesignFinished
     | StartEngine String deriving (Show)
 
-pSbyLog :: TextParser [SbyLogLine]
-pSbyLog = M.some (lexeme pSbyLogLine)
+pSbyCommand :: TextParser SbyCommand
+pSbyCommand = 
+    lexeme (
+        choice [
+            pMoving,
+            pCopy,
+            try pSynthesisFinished,
+            pSynthesisStart,
+            pSMT2DesignStart,
+            pSMT2DesignFinished,
+            try pStartEngine,
+            pCreateEngine
+        ] )
 
-pSbyLogLine :: TextParser SbyLogLine
-pSbyLogLine = do
-    path <- pSbyHeader
-    cmd <- pLogType
-    return (SbyLogLine path cmd)
-
-pLogType :: TextParser LogType
-pLogType = lexeme (
-    choice [
-        pMoving,
-        pCopy,
-        try pSynthesisFinished,
-        pSynthesisStart,
-        pSMT2DesignStart,
-        pSMT2DesignFinished,
-        try pStartEngine,
-        pCreateEngine
-    ] )
-
-pMoving :: TextParser LogType
+pMoving :: TextParser SbyCommand
 pMoving = do
     _ <- pKeyword "Moving"
     _ <- pKeyword "directory"
@@ -63,7 +52,7 @@ pMoving = do
     _ <- char '.'
     return (Moving from to)
 
-pCopy :: TextParser LogType
+pCopy :: TextParser SbyCommand
 pCopy = do
     _ <- pKeyword "Copy"
     from <- T.unpack <$> pBlock '\'' '\'' pPath
@@ -72,54 +61,34 @@ pCopy = do
     _ <- char '.'
     return (Copy from to)
 
-pCreateEngine :: TextParser LogType
+pCreateEngine :: TextParser SbyCommand
 pCreateEngine = do
     _ <- pEngine0
     engine <- T.unpack <$> pWord
     return (CreateEngine engine)
 
-pSynthesisStart :: TextParser LogType
+pSynthesisStart :: TextParser SbyCommand
 pSynthesisStart = do
     _ <- pBase
     _ <- pKeyword "starting process"
     process <- T.unpack <$> pBlock '\"' '\"' pProcess
     return (SynthesisStart process)
 
-pSynthesisFinished :: TextParser LogType
+pSynthesisFinished :: TextParser SbyCommand
 pSynthesisFinished = SynthesisFinished <$ (pBase <* pKeyword "finished (returncode=0)")
 
-pSMT2DesignStart :: TextParser LogType
+pSMT2DesignStart :: TextParser SbyCommand
 pSMT2DesignStart = do
     _ <- pKeyword "smt2: starting process"
     process <- T.unpack <$> pBlock '\"' '\"' pProcess
     return (SMT2DesignStart process)
 
-pSMT2DesignFinished :: TextParser LogType
+pSMT2DesignFinished :: TextParser SbyCommand
 pSMT2DesignFinished = SMT2DesignFinished <$ pKeyword "smt2: finished (returncode=0)"
 
-pStartEngine :: TextParser LogType
+pStartEngine :: TextParser SbyCommand
 pStartEngine = do
     _ <- pEngine0
     _ <- pKeyword "starting process"
     process <- T.unpack <$> pBlock '\"' '\"' pProcess
     return (StartEngine process)
-
-pSbyHeader :: TextParser String
-pSbyHeader = do
-    _ <- pKeyword "SBY"
-    hour <- integer
-    _ <- char ':'
-    minute <- integer
-    _ <- char ':'
-    seconds <- integer
-    T.unpack <$> pBlock '[' ']' pPath
-
-pEngine0 :: TextParser String
-pEngine0 = do
-    _ <- pKeyword "engine_0:"
-    return "engine_0"
-
-pBase :: TextParser String
-pBase = do
-    _ <- pKeyword "base:"
-    return "base"
