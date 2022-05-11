@@ -6,7 +6,6 @@ module Parsers.SbyLog.SbyCommand (
     pSbyCommand
 ) where
 
-import Parsers.SbyLog.SbyLogUtils
 import Control.Monad
 import Data.Maybe
 import Data.Text (Text)
@@ -92,3 +91,13 @@ pStartEngine = do
     _ <- pKeyword "starting process"
     process <- T.unpack <$> pBlock '\"' '\"' pProcess
     return (StartEngine process)
+
+pEngine0 :: TextParser String
+pEngine0 = do
+    _ <- pKeyword "engine_0:"
+    return "engine_0"
+
+pBase :: TextParser String
+pBase = do
+    _ <- pKeyword "base:"
+    return "base"

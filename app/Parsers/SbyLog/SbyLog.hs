@@ -6,7 +6,7 @@ module Parsers.SbyLog.SbyLog (
 ) where
 
 import Parsers.SbyLog.SbyCommand
-
+import Parsers.SbyLog.SolverLog
 import Control.Monad
 import Data.Maybe
 import Data.Text (Text)
@@ -25,9 +25,6 @@ data SbyLogLine = SbyLogLine {
 
 data LogType = SbyType SbyCommand | SolverType SolverLog deriving (Show)
 
-data SolverLog = 
-    Solver String deriving (Show)
-
 pSbyLog :: TextParser [SbyLogLine]
 pSbyLog = M.some (lexeme pSbyLogLine)
 
@@ -39,13 +36,19 @@ pSbyLogLine = do
 
 pLogType :: TextParser LogType
 pLogType = choice [
-        pSbyType
+        try pSbyType,
+        pSolverType
     ]
 
 pSbyType :: TextParser LogType
 pSbyType = do
     sbyCommand <- pSbyCommand
     return (SbyType sbyCommand)
+
+pSolverType :: TextParser LogType
+pSolverType = do
+    solverType <- pSolverLog
+    return (SolverType solverType)
 
 pSbyHeader :: TextParser String
 pSbyHeader = do
