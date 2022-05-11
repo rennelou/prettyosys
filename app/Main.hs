@@ -18,7 +18,8 @@ import qualified Data.ByteString.Lazy.Char8 as L8
 import Control.Concurrent.STM (atomically)
 
 main :: IO ()
-main = readFile "verify_build/qty_elements_tracker_cover/logfile.txt" >>= (parseTest pSbyLogLine).T.pack
+--main = verifyAll
+main = readFile "verify_build/qty_elements_tracker_cover/logfile.txt" >>= (parseTest pSbyLog).T.pack
 
 verifyAll :: IO ()
 verifyAll = do

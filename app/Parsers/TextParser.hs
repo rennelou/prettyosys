@@ -10,6 +10,7 @@ module Parsers.TextParser (
     pKeyword,
     integer,
     pPath,
+    pProcess,
     pBlock
 ) where
 
@@ -50,7 +51,16 @@ integer :: TextParser Integer
 integer = lexeme L.decimal
 
 pPath :: TextParser Text
-pPath = T.pack <$> lexeme (M.some (alphaNumChar <|> char '_' <|> char '-' <|> char '.' <|> char '/' ) )
+pPath = T.pack <$> lexeme (M.some pPathChar)
+
+pPathChar :: TextParser Char
+pPathChar = alphaNumChar <|> char '_' <|> char '-' <|> char '.' <|> char '/'
+
+pProcess :: TextParser Text
+pProcess = T.pack <$> lexeme (M.some (pProcessChar <|> char ' ' <|> char '%') )
+
+pProcessChar :: TextParser Char
+pProcessChar = pPathChar <|> char ';'
 
 pBlock :: Char -> Char -> TextParser a -> TextParser a
 pBlock init end p = do
