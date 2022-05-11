@@ -1,9 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 
-module Parsers.SbyLog.SolverLog (
-    SolverLog(..),
-    pSolverLog
+module Parsers.SbyLog.SolverLog.Cover (
+    Cover(..),
+    pCover
 ) where
 
 import Control.Monad
@@ -17,22 +17,10 @@ import qualified Text.Megaparsec.Char.Lexer as L
 import qualified Text.Megaparsec as M
 import Parsers.TextParser
 
-data SolverLog = CoverLog Cover deriving (Show)
-
 data Cover = 
       SolverCover String
     | CoverStep Integer
     | ReachedCoverPoint String Integer deriving (Show)
-
-pSolverLog :: TextParser SolverLog
-pSolverLog = choice [
-        pCoverLog
-    ]
-
-pCoverLog :: TextParser SolverLog
-pCoverLog = do
-    cover <- pCover
-    return (CoverLog cover)
 
 pCover :: TextParser Cover
 pCover = do

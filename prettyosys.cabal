@@ -36,7 +36,8 @@ executable prettyosys
                    Parsers.FileExtensions.PSL,
                    Parsers.SbyLog.SbyLog,
                    Parsers.SbyLog.SbyCommand,
-                   Parsers.SbyLog.SolverLog,
+                   Parsers.SbyLog.SolverLog.SolverLog,
+                   Parsers.SbyLog.SolverLog.Cover,
                    Utils.FolderSearch
 
     -- LANGUAGE extensions used by modules in this package.

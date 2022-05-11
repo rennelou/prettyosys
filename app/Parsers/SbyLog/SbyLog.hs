@@ -6,7 +6,7 @@ module Parsers.SbyLog.SbyLog (
 ) where
 
 import Parsers.SbyLog.SbyCommand
-import Parsers.SbyLog.SolverLog
+import Parsers.SbyLog.SolverLog.SolverLog
 import Control.Monad
 import Data.Maybe
 import Data.Text (Text)
