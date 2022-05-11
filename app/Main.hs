@@ -19,7 +19,7 @@ import Control.Concurrent.STM (atomically)
 
 main :: IO ()
 --main = verifyAll
-main = readFile "verify_build/qty_elements_tracker_cover/logfile.txt" >>= (parseTest pSbyLog).T.pack
+main = readFile "verify_build/sorted_list_cover/logfile.txt" >>= (parseTest pSbyLog).T.pack
 
 verifyAll :: IO ()
 verifyAll = do

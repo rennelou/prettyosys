@@ -11,6 +11,7 @@ module Parsers.TextParser (
     integer,
     pPath,
     pProcess,
+    pHour,
     pBlock
 ) where
 
@@ -61,6 +62,15 @@ pProcess = T.pack <$> lexeme (M.some (pProcessChar <|> char ' ' <|> char '%') )
 
 pProcessChar :: TextParser Char
 pProcessChar = pPathChar <|> char ';'
+
+pHour :: TextParser (Integer, Integer, Integer)
+pHour = do
+    hour <- integer
+    _ <- char ':'
+    minute <- integer
+    _ <- char ':' 
+    seconds <- integer
+    return (hour, minute, seconds)
 
 pBlock :: Char -> Char -> TextParser a -> TextParser a
 pBlock init end p = do

@@ -20,7 +20,12 @@ import Parsers.TextParser
 data Cover = 
       SolverCover String
     | CoverStep Integer
-    | ReachedCoverPoint String Integer deriving (Show)
+    | ReachedCoverPoint String Integer
+    | UnreachdCoverPoint String
+    | WritingCoverVCD String
+    | WritingCoverTestbench String 
+    | WritingCoverConstraint String 
+    | CoverStatus String deriving (Show)
 
 pCover :: TextParser Cover
 pCover = do
@@ -29,7 +34,12 @@ pCover = do
         choice [
             pSolverCover,
             pCoverStep,
-            pReachedCoverPoint
+            pReachedCoverPoint,
+            pUnreachdCoverPoint,
+            pWritingCoverVCD,
+            pWritingCoverTestbench,
+            pWritingCoverConstraint,
+            pCoverStatus
         ] )
 
 pSolverCover :: TextParser Cover
@@ -54,10 +64,41 @@ pReachedCoverPoint = do
     _ <- pKeyword "."
     return (ReachedCoverPoint coverPoint step)
 
+pUnreachdCoverPoint :: TextParser Cover
+pUnreachdCoverPoint = do
+    _ <- pKeyword "Unreached cover statement at"
+    coverPoint <- pCoverPoint
+    return (UnreachdCoverPoint coverPoint)
+
+pWritingCoverVCD :: TextParser Cover
+pWritingCoverVCD = do
+    _ <- pKeyword "Writing trace to VCD file:"
+    trace <- T.unpack <$> pPath
+    return (WritingCoverVCD trace)
+
+pWritingCoverTestbench :: TextParser Cover
+pWritingCoverTestbench = do
+    _ <- pKeyword "Writing trace to Verilog testbench:"
+    testbench <- T.unpack <$> pPath
+    return (WritingCoverTestbench testbench)
+
+pWritingCoverConstraint :: TextParser Cover
+pWritingCoverConstraint = do
+    _ <- pKeyword "Writing trace to constraints file:"
+    constraints <- T.unpack <$> pPath
+    return (WritingCoverConstraint constraints)
+
+pCoverStatus :: TextParser Cover
+pCoverStatus = do
+    _ <- pKeyword "Status:"
+    status <- T.unpack <$> pWord
+    return (CoverStatus status)
+
 pEngineCover :: TextParser String
 pEngineCover = do
-    _ <- pKeyword "engine_0: ##   0:00:00"
+    _ <- pKeyword "engine_0: ##"
+    _ <- pHour
     return "Cover Engine"
 
 pCoverPoint :: TextParser String
-pCoverPoint = lexeme (M.some (alphaNumChar <|> char '_' <|> char '.') )
+pCoverPoint = lexeme (M.some (alphaNumChar <|> char '_' <|> char '.' <|> char ':') )

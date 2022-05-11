@@ -53,9 +53,5 @@ pSolverType = do
 pSbyHeader :: TextParser String
 pSbyHeader = do
     _ <- pKeyword "SBY"
-    hour <- integer
-    _ <- char ':'
-    minute <- integer
-    _ <- char ':'
-    seconds <- integer
+    _ <- pHour
     T.unpack <$> pBlock '[' ']' pPath
