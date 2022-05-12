@@ -35,11 +35,12 @@ executable prettyosys
                    Parsers.FileExtensions.VHDL,
                    Parsers.FileExtensions.PSL,
                    Parsers.SbyLog.SbyLog,
-                   Parsers.SbyLog.SolverLog.SolverLog,
-                   Parsers.SbyLog.SolverLog.Cover,
-                   Parsers.SbyLog.SolverLog.Basecase,
-                   Parsers.SbyLog.SolverLog.Induction,
-                   Parsers.SbyLog.SolverLog.Utils,
+                   Parsers.SbyLog.Utils,
+                   Parsers.SbyLog.LogType.LogType,
+                   Parsers.SbyLog.LogType.SolverLog.SolverLog,
+                   Parsers.SbyLog.LogType.SolverLog.Cover,
+                   Parsers.SbyLog.LogType.SolverLog.Basecase,
+                   Parsers.SbyLog.LogType.SolverLog.Induction,
                    Utils.FolderSearch
 
     -- LANGUAGE extensions used by modules in this package.

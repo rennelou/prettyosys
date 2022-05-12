@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 
-module Parsers.SbyLog.SolverLog.SolverLog (
+module Parsers.SbyLog.LogType.SolverLog.SolverLog (
     SolverLog(..),
     Cover(..),
     Basecase(..),
@@ -9,9 +9,9 @@ module Parsers.SbyLog.SolverLog.SolverLog (
     pSolverLog
 ) where
 
-import Parsers.SbyLog.SolverLog.Cover
-import Parsers.SbyLog.SolverLog.Basecase
-import Parsers.SbyLog.SolverLog.Induction
+import Parsers.SbyLog.LogType.SolverLog.Cover
+import Parsers.SbyLog.LogType.SolverLog.Basecase
+import Parsers.SbyLog.LogType.SolverLog.Induction
 import Control.Monad
 import Data.Maybe
 import Data.Text (Text)

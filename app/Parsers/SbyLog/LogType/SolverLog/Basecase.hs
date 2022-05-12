@@ -1,12 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 
-module Parsers.SbyLog.SolverLog.Basecase (
+module Parsers.SbyLog.LogType.SolverLog.Basecase (
     Basecase(..),
     pBasecase
 ) where
 
-import Parsers.SbyLog.SolverLog.Utils
+import Parsers.SbyLog.Utils
 
 import Control.Monad
 import Data.Maybe

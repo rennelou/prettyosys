@@ -1,14 +1,15 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 
-module Parsers.SbyLog.SolverLog.Utils (
+module Parsers.SbyLog.Utils (
     pEntity,
     pProperty,
     pCheck,
     pWritingVCD,
     pWritingTestbench,
     pWritingConstraint,
-    pStatus
+    pStatus,
+    pAnything
 ) where
 
 import Control.Monad
@@ -58,3 +59,6 @@ pStatus = do
     _ <- pKeyword "Status:"
     status <- T.unpack <$> pWord
     return status
+
+pAnything :: TextParser String
+pAnything = M.many (satisfy (/= '\n'))

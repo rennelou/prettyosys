@@ -8,7 +8,8 @@ module Parsers.SbyLog.SbyLog (
     getErrorLogs
 ) where
 
-import Parsers.SbyLog.SolverLog.SolverLog
+import Parsers.SbyLog.Utils
+import Parsers.SbyLog.LogType.LogType
 import Control.Monad
 import Data.Maybe
 import Data.Text (Text)
@@ -23,8 +24,6 @@ import Parsers.TextParser
 data SbyLog = 
       SbyLogLine { taskPath :: String, logline :: LogType }
     | Error String deriving (Show)
-
-data LogType = SbyCommand | SolverType SolverLog deriving (Show)
 
 getCoverLogs :: Text -> [Cover]
 getCoverLogs = getFilteredLogs (coverFilter <=< sbyLogLineFilter)
@@ -76,31 +75,11 @@ pSbyLogLine = do
     logline <- pLogType
     return (SbyLogLine path logline)
 
-pLogType :: TextParser LogType
-pLogType = choice [
-        pSolverType,
-        pSbyCommand
-    ]
-
-pSolverType :: TextParser LogType
-pSolverType = do
-    solverType <- pSolverLog
-    return (SolverType solverType)
-
 pSbyHeader :: TextParser String
 pSbyHeader = do
     _ <- pKeyword "SBY"
     _ <- pHour
     T.unpack <$> pBlock '[' ']' pPath
-
-pSbyCommand :: TextParser LogType
-pSbyCommand = lexeme pLine
-
-pLine :: TextParser LogType
-pLine = SbyCommand <$ (pAnything <* char '\n')
-
-pAnything :: TextParser String
-pAnything = M.many (satisfy (/= '\n'))
 
 pError :: TextParser SbyLog
 pError = do

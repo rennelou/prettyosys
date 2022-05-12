@@ -1,12 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 
-module Parsers.SbyLog.SolverLog.Cover (
+module Parsers.SbyLog.LogType.SolverLog.Cover (
     Cover(..),
     pCover
 ) where
 
-import Parsers.SbyLog.SolverLog.Utils
+import Parsers.SbyLog.Utils
 
 import Control.Monad
 import Data.Maybe
