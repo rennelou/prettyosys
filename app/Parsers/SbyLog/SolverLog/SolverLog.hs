@@ -7,6 +7,7 @@ module Parsers.SbyLog.SolverLog.SolverLog (
 ) where
 
 import Parsers.SbyLog.SolverLog.Cover
+import Parsers.SbyLog.SolverLog.Basecase
 import Control.Monad
 import Data.Maybe
 import Data.Text (Text)
@@ -18,14 +19,20 @@ import qualified Text.Megaparsec.Char.Lexer as L
 import qualified Text.Megaparsec as M
 import Parsers.TextParser
 
-data SolverLog = CoverLog Cover deriving (Show)
+data SolverLog = CoverLog Cover | BasecaseLog Basecase deriving (Show)
 
 pSolverLog :: TextParser SolverLog
 pSolverLog = choice [
-        pCoverLog
+        pCoverLog,
+        pBasecaseLog
     ]
 
 pCoverLog :: TextParser SolverLog
 pCoverLog = do
     cover <- pCover
     return (CoverLog cover)
+
+pBasecaseLog :: TextParser SolverLog
+pBasecaseLog = do
+    basecase <- pBasecase
+    return (BasecaseLog basecase)
