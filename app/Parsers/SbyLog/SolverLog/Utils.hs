@@ -4,6 +4,7 @@
 module Parsers.SbyLog.SolverLog.Utils (
     pEntity,
     pProperty,
+    pCheck,
     pWritingVCD,
     pWritingTestbench,
     pWritingConstraint,
@@ -26,6 +27,13 @@ pEntity = lexeme (M.some (alphaNumChar <|> char '_') )
 
 pProperty :: TextParser String
 pProperty = lexeme (M.some (alphaNumChar <|> char '_' <|> char '.' <|> char ':') )
+
+pCheck :: String -> TextParser Integer
+pCheck checkType = do
+    _ <- pKeyword $ T.pack checkType
+    step <- integer
+    _ <- pKeyword ".."
+    return step
 
 pWritingVCD :: TextParser String
 pWritingVCD = do

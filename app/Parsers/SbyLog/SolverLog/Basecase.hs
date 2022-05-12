@@ -54,16 +54,12 @@ pBasecaseSolver = do
 
 pAssumptionStep :: TextParser Basecase
 pAssumptionStep = do
-    _ <- pKeyword "Checking assumptions in step"
-    step <- integer
-    _ <- pKeyword ".."
+    step <- pCheck "Checking assumptions in step"
     return (AssumptionStep step)
 
 pAssertionStep :: TextParser Basecase
 pAssertionStep = do
-    _ <- pKeyword "Checking assertions in step"
-    step <- integer
-    _ <- pKeyword ".."
+    step <- pCheck "Checking assertions in step"
     return (AssertionStep step)
 
 pBMCFaild :: TextParser Basecase

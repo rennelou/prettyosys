@@ -21,7 +21,9 @@ import Parsers.TextParser
 
 data Induction = 
       InductionSolver String
-    | InductionStep Integer deriving (Show)
+    | InductionStep Integer 
+    | InductionSucess 
+    | InductionStatus String deriving (Show)
 
 pInduction :: TextParser Induction
 pInduction = do
@@ -29,7 +31,9 @@ pInduction = do
     lexeme (
         choice [
             pInductionSolver,
-            pInductionStep
+            pInductionStep,
+            pInductionSucess,
+            pInductionStatus
         ] )
 
 pInductionSolver :: TextParser Induction
@@ -40,10 +44,16 @@ pInductionSolver = do
 
 pInductionStep :: TextParser Induction
 pInductionStep = do
-    _ <- pKeyword "Trying induction in step"
-    step <- integer
-    _ <- pKeyword ".."
+    step <- pCheck "Trying induction in step"
     return (InductionStep step)
+
+pInductionSucess :: TextParser Induction
+pInductionSucess = InductionSucess <$ pKeyword "Temporal induction successful."
+
+pInductionStatus :: TextParser Induction
+pInductionStatus = do
+    status <- pStatus
+    return (InductionStatus status)
 
 pEngineInduction :: TextParser ()
 pEngineInduction = do

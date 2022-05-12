@@ -52,9 +52,7 @@ pSolverCover = do
 
 pCoverStep :: TextParser Cover
 pCoverStep = do
-    _ <- pKeyword "Checking cover reachability in step"
-    step <- integer
-    _ <- pKeyword ".."
+    step <- pCheck "Checking cover reachability in step"
     return (CoverStep step)
 
 pReachedCoverPoint :: TextParser Cover
