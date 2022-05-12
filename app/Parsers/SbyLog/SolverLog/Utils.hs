@@ -3,7 +3,11 @@
 
 module Parsers.SbyLog.SolverLog.Utils (
     pEntity,
-    pProperty
+    pProperty,
+    pWritingVCD,
+    pWritingTestbench,
+    pWritingConstraint,
+    pStatus
 ) where
 
 import Control.Monad
@@ -22,3 +26,27 @@ pEntity = lexeme (M.some (alphaNumChar <|> char '_') )
 
 pProperty :: TextParser String
 pProperty = lexeme (M.some (alphaNumChar <|> char '_' <|> char '.' <|> char ':') )
+
+pWritingVCD :: TextParser String
+pWritingVCD = do
+    _ <- pKeyword "Writing trace to VCD file:"
+    trace <- T.unpack <$> pPath
+    return trace
+
+pWritingTestbench :: TextParser String
+pWritingTestbench = do
+    _ <- pKeyword "Writing trace to Verilog testbench:"
+    testbench <- T.unpack <$> pPath
+    return testbench
+
+pWritingConstraint :: TextParser String
+pWritingConstraint = do
+    _ <- pKeyword "Writing trace to constraints file:"
+    constraints <- T.unpack <$> pPath
+    return constraints
+
+pStatus :: TextParser String
+pStatus = do
+    _ <- pKeyword "Status:"
+    status <- T.unpack <$> pWord
+    return status

@@ -74,26 +74,22 @@ pUnreachdCoverPoint = do
 
 pWritingCoverVCD :: TextParser Cover
 pWritingCoverVCD = do
-    _ <- pKeyword "Writing trace to VCD file:"
-    trace <- T.unpack <$> pPath
+    trace <- pWritingVCD
     return (WritingCoverVCD trace)
 
 pWritingCoverTestbench :: TextParser Cover
 pWritingCoverTestbench = do
-    _ <- pKeyword "Writing trace to Verilog testbench:"
-    testbench <- T.unpack <$> pPath
+    testbench <- pWritingTestbench
     return (WritingCoverTestbench testbench)
 
 pWritingCoverConstraint :: TextParser Cover
 pWritingCoverConstraint = do
-    _ <- pKeyword "Writing trace to constraints file:"
-    constraints <- T.unpack <$> pPath
+    constraints <- pWritingConstraint
     return (WritingCoverConstraint constraints)
 
 pCoverStatus :: TextParser Cover
 pCoverStatus = do
-    _ <- pKeyword "Status:"
-    status <- T.unpack <$> pWord
+    status <- pStatus
     return (CoverStatus status)
 
 pEngineCover :: TextParser ()

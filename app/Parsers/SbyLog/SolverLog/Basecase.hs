@@ -24,7 +24,11 @@ data Basecase =
     | AssumptionStep Integer
     | AssertionStep Integer
     | BMCFaild 
-    | AssertionFailed String String deriving (Show)
+    | AssertionFailed String String
+    | AssertionWritingVCD String 
+    | AssertionWritingTestbench String 
+    | AssertionWritingConstraints String 
+    | BasecaseStatus String deriving (Show)
 
 pBasecase :: TextParser Basecase
 pBasecase = do
@@ -35,7 +39,11 @@ pBasecase = do
             pAssumptionStep,
             pAssertionStep,
             pBMCFaild,
-            pAssertionFailed
+            pAssertionFailed,
+            pAssertionWritingVCD,
+            pAssertionWritingTestbench,
+            pAssertionWritingConstraints,
+            pBasecaseStatus
         ] )
 
 pBasecaseSolver :: TextParser Basecase
@@ -68,6 +76,26 @@ pAssertionFailed = do
     _ <- pCharsc ':'
     property <- pProperty
     return (AssertionFailed entity property)
+
+pAssertionWritingVCD :: TextParser Basecase
+pAssertionWritingVCD = do
+    vcd <- pWritingVCD
+    return (AssertionWritingVCD vcd)
+
+pAssertionWritingTestbench :: TextParser Basecase
+pAssertionWritingTestbench = do
+    testbench <- pWritingTestbench
+    return (AssertionWritingTestbench testbench)
+
+pAssertionWritingConstraints :: TextParser Basecase
+pAssertionWritingConstraints = do
+    constraints <- pWritingConstraint
+    return (AssertionWritingConstraints constraints)
+
+pBasecaseStatus :: TextParser Basecase
+pBasecaseStatus = do
+    status <- pStatus
+    return (BasecaseStatus status)
 
 pEngineBasecase :: TextParser ()
 pEngineBasecase = do

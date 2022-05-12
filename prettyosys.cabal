@@ -35,7 +35,6 @@ executable prettyosys
                    Parsers.FileExtensions.VHDL,
                    Parsers.FileExtensions.PSL,
                    Parsers.SbyLog.SbyLog,
-                   Parsers.SbyLog.SbyCommand,
                    Parsers.SbyLog.SolverLog.SolverLog,
                    Parsers.SbyLog.SolverLog.Cover,
                    Parsers.SbyLog.SolverLog.Basecase,

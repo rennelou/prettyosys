@@ -5,7 +5,6 @@ module Parsers.SbyLog.SbyLog (
     pSbyLog
 ) where
 
-import Parsers.SbyLog.SbyCommand
 import Parsers.SbyLog.SolverLog.SolverLog
 import Control.Monad
 import Data.Maybe
@@ -23,7 +22,7 @@ data SbyLogLine = SbyLogLine {
     logline     :: LogType
 } deriving (Show)
 
-data LogType = SbyType SbyCommand | SolverType SolverLog deriving (Show)
+data LogType = SbyCommand | SolverType SolverLog deriving (Show)
 
 pSbyLog :: TextParser [SbyLogLine]
 pSbyLog = M.some (lexeme pSbyLogLine)
@@ -36,14 +35,9 @@ pSbyLogLine = do
 
 pLogType :: TextParser LogType
 pLogType = choice [
-        try pSbyType,
-        pSolverType
+        pSolverType,
+        pSbyCommand
     ]
-
-pSbyType :: TextParser LogType
-pSbyType = do
-    sbyCommand <- pSbyCommand
-    return (SbyType sbyCommand)
 
 pSolverType :: TextParser LogType
 pSolverType = do
@@ -55,3 +49,12 @@ pSbyHeader = do
     _ <- pKeyword "SBY"
     _ <- pHour
     T.unpack <$> pBlock '[' ']' pPath
+
+pSbyCommand :: TextParser LogType
+pSbyCommand = lexeme pLine
+
+pLine :: TextParser LogType
+pLine = SbyCommand <$ (pAnything <* char '\n')
+
+pAnything :: TextParser String
+pAnything = M.many (satisfy (/= '\n'))
