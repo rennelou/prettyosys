@@ -2,7 +2,10 @@
 {-# LANGUAGE RecordWildCards   #-}
 
 module Parsers.SbyLog.SbyLog (
-    pSbyLog
+    getCoverLogs,
+    getBasecaseLogs,
+    getInductionLogs,
+    getErrorLogs
 ) where
 
 import Parsers.SbyLog.SolverLog.SolverLog
@@ -17,17 +20,57 @@ import qualified Text.Megaparsec.Char.Lexer as L
 import qualified Text.Megaparsec as M
 import Parsers.TextParser
 
-data SbyLogLine = SbyLogLine {
-    taskPath    :: String,
-    logline     :: LogType
-} deriving (Show)
+data SbyLog = 
+      SbyLogLine { taskPath :: String, logline :: LogType }
+    | Error String deriving (Show)
 
 data LogType = SbyCommand | SolverType SolverLog deriving (Show)
 
-pSbyLog :: TextParser [SbyLogLine]
-pSbyLog = M.some (lexeme pSbyLogLine)
+getCoverLogs :: Text -> [Cover]
+getCoverLogs = getFilteredLogs (coverFilter <=< sbyLogLineFilter)
+    where
+        coverFilter :: LogType -> Maybe Cover
+        coverFilter (SolverType (CoverLog cover)) = Just cover
+        coverFilter _ = Nothing
 
-pSbyLogLine :: TextParser SbyLogLine
+getBasecaseLogs :: Text -> [Basecase]
+getBasecaseLogs = getFilteredLogs (basecaseFilter <=< sbyLogLineFilter)
+    where
+        basecaseFilter :: LogType -> Maybe Basecase
+        basecaseFilter (SolverType (BasecaseLog basecase)) = Just basecase
+        basecaseFilter _ = Nothing
+
+getInductionLogs :: Text -> [Induction]
+getInductionLogs = getFilteredLogs (inductionFilter <=< sbyLogLineFilter)
+    where
+        inductionFilter :: LogType -> Maybe Induction
+        inductionFilter (SolverType (InductionLog induction)) = Just induction
+        inductionFilter _ = Nothing
+
+getErrorLogs :: Text -> [String]
+getErrorLogs = getFilteredLogs errorFilter
+    where
+        errorFilter :: SbyLog -> Maybe String
+        errorFilter (Error error) = Just error
+        errorFilter _ = Nothing
+
+getFilteredLogs :: (SbyLog -> Maybe a) -> Text -> [a]
+getFilteredLogs f = (catMaybes.map f) . parseLogs
+
+sbyLogLineFilter :: SbyLog -> Maybe LogType
+sbyLogLineFilter SbyLogLine { taskPath=_, logline=line } = Just line
+sbyLogLineFilter _ = Nothing
+
+parseLogs :: Text -> [SbyLog]
+parseLogs = (fromMaybe []) . (parseMaybe pSbyLog)
+
+pSbyLog :: TextParser [SbyLog]
+pSbyLog = 
+    choice [
+        M.some (lexeme pError),
+        M.some (lexeme pSbyLogLine) ]
+
+pSbyLogLine :: TextParser SbyLog
 pSbyLogLine = do
     path <- pSbyHeader
     logline <- pLogType
@@ -58,3 +101,9 @@ pLine = SbyCommand <$ (pAnything <* char '\n')
 
 pAnything :: TextParser String
 pAnything = M.many (satisfy (/= '\n'))
+
+pError :: TextParser SbyLog
+pError = do
+    _ <- pKeyword "ERROR:"
+    error <- (pAnything <* char '\n')
+    return (Error error)

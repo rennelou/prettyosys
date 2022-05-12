@@ -10,16 +10,18 @@ import Verify.SbyConfigFile.GetSbyConfigFiles
 import Parsers.SbyLog.SbyLog
 import Text.Megaparsec hiding (State)
 import qualified Data.Text as T
+import qualified Data.Text.Encoding as T
+import qualified Data.Text.IO as T
+import qualified Data.ByteString as B
+import qualified Data.ByteString.Lazy as BL
 
 import System.IO
 import System.Exit (ExitCode)
 import System.Process.Typed
-import qualified Data.ByteString.Lazy.Char8 as L8
 import Control.Concurrent.STM (atomically)
 
 main :: IO ()
---main = verifyAll
-main = readFile "verify_build/qty_elements_tracker_prove/logfile.txt" >>= (parseTest pSbyLog).T.pack
+main = verifyAll
 
 verifyAll :: IO ()
 verifyAll = do
@@ -55,5 +57,16 @@ getCreateSbyConfigFiles = getSbyConfigFiles . getSbyConfigArgs
 
 execute :: String -> IO ()
 execute command = do
-    runProcess $ shell command
-    return ()
+    (_, out, err) <- readProcess $ shell command
+    
+    let coverLogs = getCoverLogs $ (T.decodeUtf8 . B.concat . BL.toChunks) out
+    putStrLn $ show coverLogs
+    
+    let basecaseLogs = getBasecaseLogs $ (T.decodeUtf8 . B.concat . BL.toChunks) out
+    putStrLn $ show basecaseLogs
+
+    let inductionLogs = getInductionLogs $ (T.decodeUtf8 . B.concat . BL.toChunks) out
+    putStrLn $ show inductionLogs
+
+    let errorLogs = getErrorLogs $ (T.decodeUtf8 . B.concat . BL.toChunks) out
+    putStrLn $ show errorLogs

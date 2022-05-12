@@ -3,6 +3,9 @@
 
 module Parsers.SbyLog.SolverLog.SolverLog (
     SolverLog(..),
+    Cover(..),
+    Basecase(..),
+    Induction(..),
     pSolverLog
 ) where
 
