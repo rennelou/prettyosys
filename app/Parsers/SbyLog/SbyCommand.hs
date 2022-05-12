@@ -25,7 +25,11 @@ data SbyCommand =
     | SynthesisFinished
     | SMT2DesignStart String
     | SMT2DesignFinished
-    | StartEngine String deriving (Show)
+    | StartEngine String
+    | FinishedEngine Integer
+    | EngineStatus String
+    | Summury 
+    | Done deriving (Show)
 
 pSbyCommand :: TextParser SbyCommand
 pSbyCommand = 
@@ -33,11 +37,15 @@ pSbyCommand =
         choice [
             pMoving,
             pCopy,
-            try pSynthesisFinished,
             pSynthesisStart,
+            pSynthesisFinished,
             pSMT2DesignStart,
             pSMT2DesignFinished,
-            try pStartEngine,
+            pStartEngine,
+            pFinishedEngine,
+            pEngineStatus,
+            pSummury,
+            pDone,
             pCreateEngine
         ] )
 
@@ -63,18 +71,17 @@ pCopy = do
 pCreateEngine :: TextParser SbyCommand
 pCreateEngine = do
     _ <- pEngine0
-    engine <- T.unpack <$> pWord
+    engine <- ((M.some alphaNumChar) <* (string "\n"))
     return (CreateEngine engine)
 
 pSynthesisStart :: TextParser SbyCommand
 pSynthesisStart = do
-    _ <- pBase
-    _ <- pKeyword "starting process"
+    _ <- pKeyword "base: starting process"
     process <- T.unpack <$> pBlock '\"' '\"' pProcess
     return (SynthesisStart process)
 
 pSynthesisFinished :: TextParser SbyCommand
-pSynthesisFinished = SynthesisFinished <$ (pBase <* pKeyword "finished (returncode=0)")
+pSynthesisFinished = SynthesisFinished <$ pKeyword "base: finished (returncode=0)"
 
 pSMT2DesignStart :: TextParser SbyCommand
 pSMT2DesignStart = do
@@ -87,17 +94,43 @@ pSMT2DesignFinished = SMT2DesignFinished <$ pKeyword "smt2: finished (returncode
 
 pStartEngine :: TextParser SbyCommand
 pStartEngine = do
-    _ <- pEngine0
-    _ <- pKeyword "starting process"
+    _ <- pKeyword "engine_0: starting process"
     process <- T.unpack <$> pBlock '\"' '\"' pProcess
     return (StartEngine process)
+
+pFinishedEngine :: TextParser SbyCommand
+pFinishedEngine = do
+    _ <- string "engine_0: finished (returncode="
+    returnCode <- integer
+    _ <- pCharsc ')'
+    return (FinishedEngine returnCode)
+
+pEngineStatus :: TextParser SbyCommand
+pEngineStatus = do
+    _ <- pKeyword "engine_0: Status returned by engine:"
+    status <- T.unpack <$> pWord
+    return (EngineStatus status)
+
+pSummury :: TextParser SbyCommand
+pSummury = Summury <$ (pKeyword "summary:" <* pAnything <* char '\n')
+
+pDone :: TextParser SbyCommand
+pDone = Done <$ (pKeyword "DONE" <* pAnything <* char '\n')
 
 pEngine0 :: TextParser String
 pEngine0 = do
     _ <- pKeyword "engine_0:"
     return "engine_0"
 
-pBase :: TextParser String
-pBase = do
-    _ <- pKeyword "base:"
-    return "base"
+pAnything :: TextParser String
+pAnything = M.many (
+        alphaNumChar
+    <|> char ' '
+    <|> char '(' 
+    <|> char ')' 
+    <|> char '['
+    <|> char ']'
+    <|> char ':'
+    <|> char ','
+    <|> char '_'
+    <|> char '=' )
