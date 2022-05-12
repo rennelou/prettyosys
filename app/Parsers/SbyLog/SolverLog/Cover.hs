@@ -6,6 +6,8 @@ module Parsers.SbyLog.SolverLog.Cover (
     pCover
 ) where
 
+import Parsers.SbyLog.SolverLog.Utils
+
 import Control.Monad
 import Data.Maybe
 import Data.Text (Text)
@@ -58,7 +60,7 @@ pCoverStep = do
 pReachedCoverPoint :: TextParser Cover
 pReachedCoverPoint = do
     _ <- pKeyword "Reached cover statement at"
-    coverPoint <- pCoverPoint
+    coverPoint <- pProperty
     _ <- pKeyword "in step"
     step <- integer
     _ <- pKeyword "."
@@ -67,7 +69,7 @@ pReachedCoverPoint = do
 pUnreachdCoverPoint :: TextParser Cover
 pUnreachdCoverPoint = do
     _ <- pKeyword "Unreached cover statement at"
-    coverPoint <- pCoverPoint
+    coverPoint <- pProperty
     return (UnreachdCoverPoint coverPoint)
 
 pWritingCoverVCD :: TextParser Cover
@@ -99,6 +101,3 @@ pEngineCover = do
     _ <- pKeyword "engine_0: ##"
     _ <- pHour
     return ()
-
-pCoverPoint :: TextParser String
-pCoverPoint = lexeme (M.some (alphaNumChar <|> char '_' <|> char '.' <|> char ':') )
