@@ -25,7 +25,9 @@ data SbyCommand =
     | SynthesisFinished
     | SMT2DesignStart String
     | SMT2DesignFinished
-    | StartEngine String
+    | CoverStart String
+    | BasecaseStart String
+    | InductionStart String
     | FinishedEngine Integer
     | EngineStatus String
     | Summury 
@@ -41,7 +43,9 @@ pSbyCommand =
             pSynthesisFinished,
             pSMT2DesignStart,
             pSMT2DesignFinished,
-            pStartEngine,
+            pCoverStart,
+            pBasecaseStart,
+            pInductionStart,
             pFinishedEngine,
             pEngineStatus,
             pSummury,
@@ -70,7 +74,7 @@ pCopy = do
 
 pCreateEngine :: TextParser SbyCommand
 pCreateEngine = do
-    _ <- pEngine0
+    _ <- pKeyword "engine_0:"
     engine <- ((M.some alphaNumChar) <* (string "\n"))
     return (CreateEngine engine)
 
@@ -92,11 +96,20 @@ pSMT2DesignStart = do
 pSMT2DesignFinished :: TextParser SbyCommand
 pSMT2DesignFinished = SMT2DesignFinished <$ pKeyword "smt2: finished (returncode=0)"
 
-pStartEngine :: TextParser SbyCommand
-pStartEngine = do
-    _ <- pKeyword "engine_0: starting process"
-    process <- T.unpack <$> pBlock '\"' '\"' pProcess
-    return (StartEngine process)
+pCoverStart :: TextParser SbyCommand
+pCoverStart = do
+    process <- pTaskStart ""
+    return (CoverStart process)
+
+pBasecaseStart :: TextParser SbyCommand
+pBasecaseStart = do
+    process <- pTaskStart ".basecase"
+    return (BasecaseStart process)
+
+pInductionStart :: TextParser SbyCommand
+pInductionStart = do
+    process <- pTaskStart ".induction"
+    return (InductionStart process)
 
 pFinishedEngine :: TextParser SbyCommand
 pFinishedEngine = do
@@ -117,10 +130,11 @@ pSummury = Summury <$ (pKeyword "summary:" <* pAnything <* char '\n')
 pDone :: TextParser SbyCommand
 pDone = Done <$ (pKeyword "DONE" <* pAnything <* char '\n')
 
-pEngine0 :: TextParser String
-pEngine0 = do
-    _ <- pKeyword "engine_0:"
-    return "engine_0"
+pTaskStart :: String -> TextParser String
+pTaskStart task = do
+    _ <- pKeyword $ T.pack ("engine_0" ++ task ++ ": starting process")
+    process <- T.unpack <$> pBlock '\"' '\"' pProcess
+    return process
 
 pAnything :: TextParser String
 pAnything = M.many (
