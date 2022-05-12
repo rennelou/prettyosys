@@ -8,6 +8,7 @@ module Parsers.SbyLog.SolverLog.SolverLog (
 
 import Parsers.SbyLog.SolverLog.Cover
 import Parsers.SbyLog.SolverLog.Basecase
+import Parsers.SbyLog.SolverLog.Induction
 import Control.Monad
 import Data.Maybe
 import Data.Text (Text)
@@ -19,12 +20,13 @@ import qualified Text.Megaparsec.Char.Lexer as L
 import qualified Text.Megaparsec as M
 import Parsers.TextParser
 
-data SolverLog = CoverLog Cover | BasecaseLog Basecase deriving (Show)
+data SolverLog = CoverLog Cover | BasecaseLog Basecase | InductionLog Induction deriving (Show)
 
 pSolverLog :: TextParser SolverLog
 pSolverLog = choice [
         pCoverLog,
-        pBasecaseLog
+        pBasecaseLog,
+        pInductionLog
     ]
 
 pCoverLog :: TextParser SolverLog
@@ -36,3 +38,8 @@ pBasecaseLog :: TextParser SolverLog
 pBasecaseLog = do
     basecase <- pBasecase
     return (BasecaseLog basecase)
+
+pInductionLog :: TextParser SolverLog
+pInductionLog = do
+    induction <- pInduction
+    return (InductionLog induction)

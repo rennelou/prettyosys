@@ -94,11 +94,11 @@ pCoverStatus = do
     status <- T.unpack <$> pWord
     return (CoverStatus status)
 
-pEngineCover :: TextParser String
+pEngineCover :: TextParser ()
 pEngineCover = do
     _ <- pKeyword "engine_0: ##"
     _ <- pHour
-    return "Cover Engine"
+    return ()
 
 pCoverPoint :: TextParser String
 pCoverPoint = lexeme (M.some (alphaNumChar <|> char '_' <|> char '.' <|> char ':') )
