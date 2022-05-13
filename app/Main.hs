@@ -7,6 +7,7 @@ import Verify.SbyCommand
 import Verify.SbyConfigFile.SbyConfigFile
 import Verify.SbyConfigFile.GetSbyConfigFiles
 import Verify.CoverPoint
+import Verify.Assertion
 
 import Parsers.SbyLog.SbyLog
 import Text.Megaparsec hiding (State)
@@ -63,7 +64,7 @@ execute command = do
     let coverLogs = getCoverPoints out
     putStrLn $ show coverLogs
     
-    let basecaseLogs = getBasecaseLogs $ (T.decodeUtf8 . B.concat . BL.toChunks) out
+    let basecaseLogs = getAssertion out
     putStrLn $ show basecaseLogs
 
     let inductionLogs = getInductionLogs $ (T.decodeUtf8 . B.concat . BL.toChunks) out

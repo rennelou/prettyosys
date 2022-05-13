@@ -14,8 +14,8 @@ import qualified Data.ByteString.Lazy as BL
 data CoverPoint = CoverPoint {
     _CPname     :: String,
     _CPreached  :: Bool,
-    _CPstep     :: Integer,
-    _CPtrace    :: String
+    _CPstep     :: Maybe Integer,
+    _CPtrace    :: Maybe String
 } deriving (Show)
 
 data CoverGroupState = CoverGroupState {
@@ -34,21 +34,24 @@ mapToCoverPoints  = coverPoints . (foldl nextState (CoverGroupState [] [])) . ge
             CoverGroupState (buffer ++ [reached]) coverPoints
         
         nextState CoverGroupState {buffer=buffer,coverPoints=coverPoints} unreached@(UnreachdCoverPoint _) =
-            CoverGroupState buffer (coverPoints ++ [createCoverPoint "" unreached])
+            CoverGroupState buffer (coverPoints ++ [createUnreachedCoverPoint unreached])
         
         nextState CoverGroupState {buffer=buffer,coverPoints=coverPoints} (WritingCoverVCD trace) =
-            CoverGroupState [] (coverPoints ++ (map (createCoverPoint trace) buffer))
+            CoverGroupState [] (coverPoints ++ (map (createReachedCoverPoint trace) buffer))
         
-        createCoverPoint :: String -> Cover -> CoverPoint
-        createCoverPoint trace (ReachedCoverPoint name step) = CoverPoint name True step trace
-        createCoverPoint _ (UnreachdCoverPoint name) = CoverPoint name False (-1) ""
-        createCoverPoint _ _ = error "error creating coverPoint"
+        createReachedCoverPoint :: String -> Cover -> CoverPoint
+        createReachedCoverPoint trace (ReachedCoverPoint name step) = CoverPoint name True (Just step) (Just trace)
+        createReachedCoverPoint _ _ = error "error creating reached cover point"
+        
+        createUnreachedCoverPoint :: Cover -> CoverPoint
+        createUnreachedCoverPoint (UnreachdCoverPoint name) = CoverPoint name False Nothing Nothing
+        createUnreachedCoverPoint _ = error "error creating unreached coverPoint"
 
-getValidCoverEvents :: [Cover] -> [Cover]
-getValidCoverEvents = filter isCoverValid
-    where
-        isCoverValid :: Cover -> Bool
-        isCoverValid (ReachedCoverPoint _ _) = True
-        isCoverValid (UnreachdCoverPoint _) = True
-        isCoverValid (WritingCoverVCD _) = True
-        isCoverValid _ = False
+        getValidCoverEvents :: [Cover] -> [Cover]
+        getValidCoverEvents = filter isCoverValid
+            where
+                isCoverValid :: Cover -> Bool
+                isCoverValid (ReachedCoverPoint _ _) = True
+                isCoverValid (UnreachdCoverPoint _) = True
+                isCoverValid (WritingCoverVCD _) = True
+                isCoverValid _ = False

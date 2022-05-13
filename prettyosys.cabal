@@ -30,6 +30,7 @@ executable prettyosys
                    Verify.SbyConfigFile.SbyConfigFile,
                    Verify.SbyConfigFile.GetSbyConfigFiles,
                    Verify.CoverPoint,
+                   Verify.Assertion,
                    Parsers.TextParser,
                    Parsers.PSL,
                    Parsers.FileExtensions.Base,
