@@ -98,7 +98,7 @@ getCoverPoints  = coverPoints . (foldl nextState (CoverGroupState [] [])) . getV
         
         createCoverPoint :: String -> Cover -> CoverPoint
         createCoverPoint trace (ReachedCoverPoint name step) = CoverPoint name True step trace
-        createCoverPoint _ (UnreachdCoverPoint name) = CoverPoint name False -1 ""
+        createCoverPoint _ (UnreachdCoverPoint name) = CoverPoint name False (-1) ""
         createCoverPoint _ _ = error "error creating coverPoint"
 
 getValidCoverEvents :: [Cover] -> [Cover]
