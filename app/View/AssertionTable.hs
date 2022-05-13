@@ -9,17 +9,20 @@ import Text.Layout.Table.Cell.Formatted
 
 createAssertionTable :: Assertion -> Assertion -> String
 createAssertionTable basecase induction =
-    assertionTable [assertionRow basecase, assertionRow induction]
+    assertionTable [
+        assertionRow "Basecase" basecase, 
+        assertionRow "Induction" induction ]
 
 assertionTable :: [[Formatted String]] -> String
 assertionTable rows  = 
-    tableString [def , def, def, def]
+    tableString [def, def, def, def, def]
                 unicodeS
-                (titlesH ["Status", "Step", "Assertion Failed", "Trace"])
+                (titlesH ["Mode", "Status", "Step", "Assertion Failed", "Trace"])
                 (map rowG rows)
 
-assertionRow :: Assertion -> [Formatted String]
-assertionRow ass = [boolToPass ass, prettyStep ass, prettyAssertionName ass, prettyTrace ass]
+assertionRow :: String -> Assertion -> [Formatted String]
+assertionRow mode ass =
+    [simpleFormettedString mode, boolToPass ass, prettyStep ass, prettyAssertionName ass, prettyTrace ass]
 
 boolToPass :: Assertion -> Formatted String
 boolToPass ass = 
@@ -28,16 +31,19 @@ boolToPass ass =
         False -> red "Failed"
 
 prettyStep :: Assertion -> Formatted String
-prettyStep ass = formatted "" (show (_ATstep ass)) ""
+prettyStep ass = simpleFormettedString (show (_ATstep ass))
 
 prettyAssertionName :: Assertion -> Formatted String
 prettyAssertionName ass =
     case (_ATassertionFailed ass) of
-        (Just s) -> formatted "" s ""
-        Nothing -> formatted "" "" ""
+        (Just s) -> simpleFormettedString s
+        Nothing -> simpleFormettedString ""
 
 prettyTrace :: Assertion -> Formatted String
 prettyTrace ass =
     case (_ATtrace ass) of
-        (Just trace) -> formatted "" trace ""
-        Nothing -> formatted "" "" ""
+        (Just trace) -> simpleFormettedString trace
+        Nothing -> simpleFormettedString ""
+
+simpleFormettedString :: String -> Formatted String
+simpleFormettedString s = formatted "" s ""
