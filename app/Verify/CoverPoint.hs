@@ -1,5 +1,5 @@
 module Verify.CoverPoint (
-    CoverPoint,
+    CoverPoint(..),
     getCoverPoints
 ) where
 

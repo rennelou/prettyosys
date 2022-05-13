@@ -32,6 +32,8 @@ executable prettyosys
                    Verify.CoverPoint,
                    Verify.Assertion,
                    Verify.Error,
+                   View.CoverTable,
+                   View.Utils,
                    Parsers.TextParser,
                    Parsers.PSL,
                    Parsers.FileExtensions.Base,
@@ -56,7 +58,8 @@ executable prettyosys
                       bytestring ^>=0.10.12.0,
                       stm ^>=2.5.0.1,
                       optparse-applicative,
-                      megaparsec
+                      megaparsec,
+                      table-layout ^>= 0.9.1.0
     
     hs-source-dirs:   app
     default-language: Haskell2010

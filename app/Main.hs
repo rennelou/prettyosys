@@ -11,6 +11,9 @@ import Verify.CoverPoint
 import Verify.Assertion
 import Verify.Error
 
+import View.CoverTable
+import qualified Data.ByteString.Lazy as BL
+
 import System.IO
 import System.Exit (ExitCode)
 import System.Process.Typed
@@ -31,7 +34,7 @@ verifyAll = do
         mapM
             (\ sby -> do
                 putStrLn "Running verification"
-                (execute . createCommand) sby
+                (prettyPrint . execute . createCommand) sby
             )
             sbys
     
@@ -51,10 +54,14 @@ getCreateSbyConfigFiles = getSbyConfigFiles . getSbyConfigArgs
         getSbyConfigArgs args =
             SbyConfigArgs (getDepht args)
 
-execute :: String -> IO ()
+execute :: String -> IO BL.ByteString
 execute command = do
-    (_, out, err) <- readProcess $ shell command
-    
+    (_, out, _) <- readProcess $ shell command
+    return out
+
+prettyPrint :: IO BL.ByteString -> IO ()
+prettyPrint ioOut = do
+    out <- ioOut
     let coverLogs = getCoverPoints out
     putStrLn $ show coverLogs
     
@@ -67,3 +74,4 @@ execute command = do
     let errorLogs = getError out
     putStrLn $ show errorLogs
 
+    putStrLn $ createCoverTable coverLogs
