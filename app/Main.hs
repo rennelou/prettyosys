@@ -3,19 +3,13 @@
 module Main where
 
 import Cli
+
 import Verify.SbyCommand
 import Verify.SbyConfigFile.SbyConfigFile
 import Verify.SbyConfigFile.GetSbyConfigFiles
 import Verify.CoverPoint
 import Verify.Assertion
-
-import Parsers.SbyLog.SbyLog
-import Text.Megaparsec hiding (State)
-import qualified Data.Text as T
-import qualified Data.Text.Encoding as T
-import qualified Data.Text.IO as T
-import qualified Data.ByteString as B
-import qualified Data.ByteString.Lazy as BL
+import Verify.Error
 
 import System.IO
 import System.Exit (ExitCode)
@@ -70,6 +64,6 @@ execute command = do
     let inductionLogs = getInductionAssertion out
     putStrLn $ show inductionLogs
 
-    let errorLogs = getErrorLogs $ (T.decodeUtf8 . B.concat . BL.toChunks) out
+    let errorLogs = getError out
     putStrLn $ show errorLogs
 

@@ -31,6 +31,7 @@ executable prettyosys
                    Verify.SbyConfigFile.GetSbyConfigFiles,
                    Verify.CoverPoint,
                    Verify.Assertion,
+                   Verify.Error,
                    Parsers.TextParser,
                    Parsers.PSL,
                    Parsers.FileExtensions.Base,
