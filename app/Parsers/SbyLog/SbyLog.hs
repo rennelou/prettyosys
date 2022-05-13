@@ -5,7 +5,10 @@ module Parsers.SbyLog.SbyLog (
     getCoverLogs,
     getBasecaseLogs,
     getInductionLogs,
-    getErrorLogs
+    getErrorLogs,
+    Cover(..),
+    Basecase(..),
+    Induction(..)
 ) where
 
 import Parsers.SbyLog.Utils
