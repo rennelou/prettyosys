@@ -27,6 +27,7 @@ executable prettyosys
     -- Modules included in this executable, other than Main.
     other-modules: Cli.RunApp,
                    Cli.VerifyArgs,
+                   RTL.RTL,
                    Verify.Verify,
                    Verify.SbyCommand,
                    Verify.SbyConfigFile.SbyConfigFile,
@@ -49,7 +50,8 @@ executable prettyosys
                    Parsers.SbyLog.LogType.SolverLog.Cover,
                    Parsers.SbyLog.LogType.SolverLog.Basecase,
                    Parsers.SbyLog.LogType.SolverLog.Induction,
-                   Utils.FolderSearch
+                   Utils.FolderSearch,
+                   Utils.FileSearch
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
