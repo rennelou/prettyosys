@@ -1,5 +1,5 @@
 module Verify.Assertion (
-    Assertion,
+    Assertion(..),
     getBasecaseAssertion,
     getInductionAssertion
 ) where

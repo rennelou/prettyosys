@@ -21,7 +21,7 @@ coverRow :: CoverPoint -> [Formatted String]
 coverRow cp = [prettyCoverName cp, boolToReached cp, prettyStep cp, prettyTrace cp]
 
 prettyCoverName :: CoverPoint -> Formatted String
-prettyCoverName s = formatted "" (_CPname s) ""
+prettyCoverName cp = formatted "" (_CPname cp) ""
 
 boolToReached :: CoverPoint -> Formatted String
 boolToReached cp = 

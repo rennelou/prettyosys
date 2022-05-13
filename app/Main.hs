@@ -12,6 +12,7 @@ import Verify.Assertion
 import Verify.Error
 
 import View.CoverTable
+import View.AssertionTable
 import qualified Data.ByteString.Lazy as BL
 
 import System.IO
@@ -62,16 +63,8 @@ execute command = do
 prettyPrint :: IO BL.ByteString -> IO ()
 prettyPrint ioOut = do
     out <- ioOut
-    let coverLogs = getCoverPoints out
-    putStrLn $ show coverLogs
-    
-    let basecaseLogs = getBasecaseAssertion out
-    putStrLn $ show basecaseLogs
 
-    let inductionLogs = getInductionAssertion out
-    putStrLn $ show inductionLogs
+    putStrLn $ createCoverTable $ getCoverPoints out
+    putStrLn $ createAssertionTable (getBasecaseAssertion out) (getInductionAssertion out)
 
-    let errorLogs = getError out
-    putStrLn $ show errorLogs
-
-    putStrLn $ createCoverTable coverLogs
+    putStrLn $ getError out

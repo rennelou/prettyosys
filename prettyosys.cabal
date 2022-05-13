@@ -33,6 +33,7 @@ executable prettyosys
                    Verify.Assertion,
                    Verify.Error,
                    View.CoverTable,
+                   View.AssertionTable,
                    View.Utils,
                    Parsers.TextParser,
                    Parsers.PSL,
