@@ -29,39 +29,37 @@ data SbyLog =
     | Error String deriving (Show)
 
 getCoverLogs :: Text -> [Cover]
-getCoverLogs = getFilteredLogs (coverFilter <=< sbyLogLineFilter)
+getCoverLogs = catMaybes . (map getCover) . parseLogs
     where
-        coverFilter :: LogType -> Maybe Cover
-        coverFilter (SolverType (CoverLog cover)) = Just cover
-        coverFilter _ = Nothing
+        getCover :: SbyLog -> Maybe Cover
+        getCover SbyLogLine { taskPath=path, logline=(SolverType (CoverLog (WritingCoverVCD trace))) } =
+            Just (WritingCoverVCD (path ++ "/" ++ trace))
+        getCover SbyLogLine { taskPath=path, logline=(SolverType (CoverLog cover)) } = Just cover
+        getCover _ = Nothing
 
 getBasecaseLogs :: Text -> [Basecase]
-getBasecaseLogs = getFilteredLogs (basecaseFilter <=< sbyLogLineFilter)
+getBasecaseLogs = catMaybes . (map getBaseCase) . parseLogs
     where
-        basecaseFilter :: LogType -> Maybe Basecase
-        basecaseFilter (SolverType (BasecaseLog basecase)) = Just basecase
-        basecaseFilter _ = Nothing
+        getBaseCase :: SbyLog -> Maybe Basecase
+        getBaseCase SbyLogLine { taskPath=path, logline=(SolverType (BasecaseLog (AssertionWritingVCD trace))) } =
+            Just (AssertionWritingVCD (path ++ "/" ++ trace))
+        getBaseCase  SbyLogLine { taskPath=path, logline=(SolverType (BasecaseLog basecase)) } = Just basecase
+        getBaseCase _ = Nothing
 
 getInductionLogs :: Text -> [Induction]
-getInductionLogs = getFilteredLogs (inductionFilter <=< sbyLogLineFilter)
+getInductionLogs = catMaybes . (map getInduction) . parseLogs
     where
-        inductionFilter :: LogType -> Maybe Induction
-        inductionFilter (SolverType (InductionLog induction)) = Just induction
-        inductionFilter _ = Nothing
+        getInduction :: SbyLog -> Maybe Induction
+        getInduction SbyLogLine { taskPath=path, logline=(SolverType (InductionLog induction)) } =
+            Just induction
+        getInduction _ = Nothing
 
 getErrorLogs :: Text -> [String]
-getErrorLogs = getFilteredLogs errorFilter
+getErrorLogs = (catMaybes.map errorFilter) . parseLogs
     where
         errorFilter :: SbyLog -> Maybe String
         errorFilter (Error error) = Just error
         errorFilter _ = Nothing
-
-getFilteredLogs :: (SbyLog -> Maybe a) -> Text -> [a]
-getFilteredLogs f = (catMaybes.map f) . parseLogs
-
-sbyLogLineFilter :: SbyLog -> Maybe LogType
-sbyLogLineFilter SbyLogLine { taskPath=_, logline=line } = Just line
-sbyLogLineFilter _ = Nothing
 
 parseLogs :: Text -> [SbyLog]
 parseLogs = (fromMaybe []) . (parseMaybe pSbyLog)
