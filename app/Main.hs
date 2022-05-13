@@ -2,7 +2,7 @@
 
 module Main where
 
-import Cli
+import Cli.RunApp
 
 main :: IO ()
 main = runApp
