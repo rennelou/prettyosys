@@ -34,8 +34,10 @@ verifyAll = do
     verifications <- 
         mapM
             (\ sby -> do
-                putStrLn "Running verification"
-                (prettyPrint . execute . createCommand) sby
+                putStrLn "\n"
+                putStrLn $ (topLevel sby) ++ " verification"
+                out <- (execute . createCommand) sby
+                prettyPrint out
             )
             sbys
     
@@ -60,11 +62,10 @@ execute command = do
     (_, out, _) <- readProcess $ shell command
     return out
 
-prettyPrint :: IO BL.ByteString -> IO ()
-prettyPrint ioOut = do
-    out <- ioOut
-
+prettyPrint :: BL.ByteString -> IO ()
+prettyPrint out = do
     putStrLn $ createCoverTable $ getCoverPoints out
     putStrLn $ createAssertionTable (getBasecaseAssertion out) (getInductionAssertion out)
 
     putStrLn $ getError out
+    putStrLn "\n"

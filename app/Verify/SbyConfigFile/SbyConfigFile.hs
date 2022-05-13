@@ -30,7 +30,8 @@ sbyTasksConfig depth =
     "[options]\n" ++
     "cover: mode cover\n" ++
     (printf "cover: depth %d\n" depth) ++
-    "prove: mode prove\n"
+    "prove: mode prove\n" ++
+    (printf "prove: depth %d\n" depth)
 
 sbyEngineConfig :: String
 sbyEngineConfig =
