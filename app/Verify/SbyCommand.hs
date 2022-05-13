@@ -1,10 +1,18 @@
 module Verify.SbyCommand (
     SbyCommandArgs(..),
+    VerifyArgs(..),
     Mode(..),
     sbyCommandWithConfigFile,
 ) where
     import Verify.SbyConfigFile.SbyConfigFile
     import Text.Printf
+
+    data VerifyArgs = VerifyArgs {
+        getMode :: Mode,
+        getBackupFlag :: Bool,
+        getWorkDir :: String,
+        getDepht :: Int
+    } deriving (Show);
 
     data SbyCommandArgs = SbyCommandArgs {
         mode        :: Mode,

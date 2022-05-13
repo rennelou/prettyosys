@@ -1,28 +1,32 @@
 module Cli (
-    Args(..),
-    getCliOptions
+    runApp
 ) where
 
 import Verify.SbyCommand
+import Verify.Verify
+
+import Control.Monad
 import Options.Applicative
 
-data Args = Args {
-    getMode :: Mode,
-    getBackupFlag :: Bool,
-    getWorkDir :: String,
-    getDepht :: Int } deriving (Show);
+data Options = Options {
+    optCommand :: Command
+}
 
-getCliOptions :: IO Args
-getCliOptions = execParser opts
+data Command = Verify VerifyArgs
 
-opts :: ParserInfo Args
-opts = info (parseArgs <**> helper)
-    (  fullDesc
-    <> progDesc "Execute formal verification"
-    <> header "hard-to-prove - Pretty Formal Verification Cli Tool" )
+runApp ::IO ()
+runApp = join $ execParser 
+    (info (opts <**> helper)
+        (  fullDesc
+        <> progDesc "Program for use Yosys without files input and configurations"
+        <> header "prettyosys - Pretty Cli wrapper for Yosys" ) )
 
-parseArgs :: Parser Args
-parseArgs = Args <$> parseMode <*> parseBackupFlag <*> paseWorkDir <*> parseDepht
+opts :: Parser (IO ())
+opts = hsubparser 
+    ( command "verify" (info (verifyAll <$> parseVerifyArgs) (progDesc "Execute formal verification") ) )
+
+parseVerifyArgs :: Parser VerifyArgs
+parseVerifyArgs = VerifyArgs <$> parseMode <*> parseBackupFlag <*> paseWorkDir <*> parseDepht
 
 parseMode :: Parser Mode
 parseMode = option auto

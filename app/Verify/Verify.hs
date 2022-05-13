@@ -2,7 +2,6 @@ module Verify.Verify (
     verifyAll
 ) where
 
-import Cli
 import Verify.SbyCommand
 import Verify.SbyConfigFile.SbyConfigFile
 import Verify.SbyConfigFile.GetSbyConfigFiles
@@ -19,7 +18,7 @@ import System.Exit (ExitCode)
 import System.Process.Typed
 import Control.Concurrent.STM (atomically)
 
-verifyAll :: Args -> IO ()
+verifyAll :: VerifyArgs -> IO ()
 verifyAll args = do
     let createSbyConfigFiles = getCreateSbyConfigFiles args
     sbys <- createSbyConfigFiles "src" "verification_units"
@@ -37,17 +36,17 @@ verifyAll args = do
     
     return ()
 
-getCreateCommand :: Args-> SbyConfigFile -> String
+getCreateCommand :: VerifyArgs-> SbyConfigFile -> String
 getCreateCommand = sbyCommandWithConfigFile.getSbyCommandArgs
     where
-        getSbyCommandArgs :: Args -> SbyCommandArgs
-        getSbyCommandArgs Args{getMode=mode, getBackupFlag=backup, getWorkDir=workDir, getDepht=_} = 
+        getSbyCommandArgs :: VerifyArgs -> SbyCommandArgs
+        getSbyCommandArgs VerifyArgs{getMode=mode, getBackupFlag=backup, getWorkDir=workDir, getDepht=_} = 
             SbyCommandArgs mode backup workDir
 
-getCreateSbyConfigFiles :: Args -> String -> String -> IO [SbyConfigFile]
+getCreateSbyConfigFiles :: VerifyArgs -> String -> String -> IO [SbyConfigFile]
 getCreateSbyConfigFiles = getSbyConfigFiles . getSbyConfigArgs
     where
-        getSbyConfigArgs :: Args -> SbyConfigArgs
+        getSbyConfigArgs :: VerifyArgs -> SbyConfigArgs
         getSbyConfigArgs args =
             SbyConfigArgs (getDepht args)
 
