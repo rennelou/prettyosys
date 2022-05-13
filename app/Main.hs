@@ -35,7 +35,7 @@ verifyAll = do
         mapM
             (\ sby -> do
                 putStrLn "\n"
-                putStrLn $ (topLevel sby) ++ " verification"
+                putStrLn $ "\t\t\t" ++ (topLevel sby) ++ " verification"
                 out <- (execute . createCommand) sby
                 prettyPrint out
             )
