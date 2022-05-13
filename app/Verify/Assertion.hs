@@ -1,6 +1,7 @@
 module Verify.Assertion (
     Assertion,
-    getAssertion
+    getBasecaseAssertion,
+    getInductionAssertion
 ) where
 
 import Parsers.SbyLog.SbyLog
@@ -18,11 +19,14 @@ data Assertion = Assertion {
     _ATtrace            :: Maybe String
 } deriving (Show)
 
-getAssertion :: BL.ByteString -> Assertion
-getAssertion = (mapToAssertion . getBasecaseLogs) . (T.decodeUtf8 . B.concat . BL.toChunks)
+getBasecaseAssertion :: BL.ByteString -> Assertion
+getBasecaseAssertion = (mapBasecaseToAssertion . getBasecaseLogs) . (T.decodeUtf8 . B.concat . BL.toChunks)
 
-mapToAssertion :: [Basecase] -> Assertion
-mapToAssertion = (foldl nextState (Assertion False 0 Nothing Nothing)) . getValidBasecaseEvents
+getInductionAssertion :: BL.ByteString -> Assertion
+getInductionAssertion = (mapInductionToAssertion . getInductionLogs) . (T.decodeUtf8 . B.concat . BL.toChunks)
+
+mapBasecaseToAssertion :: [Basecase] -> Assertion
+mapBasecaseToAssertion = (mapToAssertion nextState) . getValidBasecaseEvents
     where
         nextState :: Assertion -> Basecase -> Assertion
         nextState (Assertion _ step name trace) (BasecaseStatus passed) = 
@@ -49,6 +53,29 @@ mapToAssertion = (foldl nextState (Assertion False 0 Nothing Nothing)) . getVali
                 isBasecaseValid (AssertionWritingVCD _) = True
                 isBasecaseValid _ = False
 
-        statusToBool :: String -> Bool
-        statusToBool "passed" = True
-        statusToBool _ =False
+mapInductionToAssertion :: [Induction] -> Assertion
+mapInductionToAssertion = (mapToAssertion nextState) . getValidInductionEvents
+    where
+        nextState :: Assertion -> Induction -> Assertion
+        nextState (Assertion _ step name trace) (InductionStatus passed) = 
+            Assertion (statusToBool passed) step name trace
+        
+        nextState (Assertion passed _ name trace) (InductionStep step) = 
+            Assertion passed step name trace
+        
+        nextState _ _ = error "error creating assertion"
+
+        getValidInductionEvents :: [Induction] -> [Induction]
+        getValidInductionEvents = filter isInductionValid
+            where
+                isInductionValid :: Induction -> Bool
+                isInductionValid (InductionStatus _) = True
+                isInductionValid (InductionStep _) = True
+                isInductionValid _ = False
+
+mapToAssertion :: (Assertion -> a -> Assertion) -> [a] -> Assertion
+mapToAssertion nextState = foldl nextState (Assertion False 0 Nothing Nothing)
+
+statusToBool :: String -> Bool
+statusToBool "passed" = True
+statusToBool _ = False

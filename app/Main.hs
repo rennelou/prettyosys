@@ -64,10 +64,10 @@ execute command = do
     let coverLogs = getCoverPoints out
     putStrLn $ show coverLogs
     
-    let basecaseLogs = getAssertion out
+    let basecaseLogs = getBasecaseAssertion out
     putStrLn $ show basecaseLogs
 
-    let inductionLogs = getInductionLogs $ (T.decodeUtf8 . B.concat . BL.toChunks) out
+    let inductionLogs = getInductionAssertion out
     putStrLn $ show inductionLogs
 
     let errorLogs = getErrorLogs $ (T.decodeUtf8 . B.concat . BL.toChunks) out
