@@ -52,8 +52,7 @@ executable prettyosys
                    Parsers.SbyLog.LogType.SolverLog.Cover,
                    Parsers.SbyLog.LogType.SolverLog.Basecase,
                    Parsers.SbyLog.LogType.SolverLog.Induction,
-                   Utils.FolderSearch,
-                   Utils.FileSearch
+                   Utils.FileExtensionSearch
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:

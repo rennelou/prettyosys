@@ -6,7 +6,7 @@ import Verify.SbyConfigFile.SbyConfigFile
 import Parsers.PSL
 import Parsers.FileExtensions.VHDL
 import Parsers.FileExtensions.PSL
-import Utils.FileSearch
+import Utils.FileExtensionSearch
 import Data.List
 
 getSbyConfigFiles :: SbyConfigArgs-> String -> String -> IO [SbyConfigFile]

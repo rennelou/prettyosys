@@ -3,7 +3,7 @@ module RTL.RTL (
     generateRTL
 ) where
 
-import Utils.FileSearch
+import Utils.FileExtensionSearch
 import Data.List
 import Text.Printf
 import System.Process.Typed

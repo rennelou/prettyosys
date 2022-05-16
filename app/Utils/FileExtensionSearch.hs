@@ -1,16 +1,19 @@
-module Utils.FileSearch (
+module Utils.FileExtensionSearch (
     getVHDLSrcs,
     getVunits
 ) where
 
-import Utils.FolderSearch
 import Parsers.PSL
 import Parsers.FileExtensions.VHDL
 import Parsers.FileExtensions.PSL
 
+import System.Directory
+import System.FilePath
+import Control.Monad
 import Data.Maybe
 import qualified Data.Text as T
 import Text.Megaparsec hiding (State)
+
 
 getVHDLSrcs :: String -> IO ([String], [String])
 getVHDLSrcs srcPath = do
@@ -32,6 +35,22 @@ getVunits srcPath vunitPath = do
                 return (tryExtractPSLFile text file path) )
             pairs )
     return (catMaybes pslMaybes)
+
+getFilesAndPaths :: FilePath -> IO ([FilePath], [FilePath])
+getFilesAndPaths rootDir = (getRecursiveContents rootDir) >>= return.unzip  
+
+getRecursiveContents :: FilePath -> IO [(FilePath,FilePath)]
+getRecursiveContents topDir = do
+    names <- listDirectory topDir
+    paths <- mapM
+                (\ name -> do
+                    let path = topDir </> name
+                    isDirectory <- doesDirectoryExist path
+                    if isDirectory
+                        then getRecursiveContents path
+                        else return [(name, path)] )
+                names
+    return (concat paths)
 
 tryExtractPSLFile :: String -> String -> String -> Maybe (PSLFile, String, String)
 tryExtractPSLFile text file path =
