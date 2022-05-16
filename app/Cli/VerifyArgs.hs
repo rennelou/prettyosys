@@ -4,10 +4,11 @@ module Cli.VerifyArgs (
 ) where
 
 import Verify.SbyCommand
+import Cli.Utils
 import Options.Applicative
 
 parseVerifyArgs :: Parser VerifyArgs
-parseVerifyArgs = VerifyArgs <$> parseMode <*> parseBackupFlag <*> paseWorkDir <*> parseDepht
+parseVerifyArgs = VerifyArgs <$> parseMode <*> parseBackupFlag <*> parseWorkDir <*> parseDepht
 
 parseMode :: Parser Mode
 parseMode = option auto
@@ -16,14 +17,6 @@ parseMode = option auto
     <> showDefault
     <> value CoverProve
     <> help "Mode cover, prove or cover and prove" )
-
-paseWorkDir :: Parser String
-paseWorkDir = strOption
-    (  long "workdir"
-    <> short 'w'
-    <> showDefault
-    <> value "verify_build"
-    <> help "Work Directory")
 
 parseDepht :: Parser Int
 parseDepht = option auto

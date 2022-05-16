@@ -8,16 +8,15 @@ import Parsers.PSL
 import Parsers.FileExtensions.VHDL
 import Parsers.FileExtensions.PSL
 
-import Data.List
 import Data.Maybe
 import qualified Data.Text as T
 import Text.Megaparsec hiding (State)
 
-getVHDLSrcs :: String -> IO (String, String)
+getVHDLSrcs :: String -> IO ([String], [String])
 getVHDLSrcs srcPath = do
     (files_arr, paths_arr) <- getFilesAndPaths srcPath
-    let files = intercalate " " $ filterVHDLExtension files_arr
-    let paths = intercalate "\n" $ filterVHDLExtension paths_arr
+    let files = filterVHDLExtension files_arr
+    let paths = filterVHDLExtension paths_arr
     return (files, paths)
 
 getVunits :: String -> String -> IO [(PSLFile, String, String)]

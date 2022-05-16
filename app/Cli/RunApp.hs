@@ -3,6 +3,7 @@ module Cli.RunApp (
 ) where
 
 import Cli.VerifyArgs
+import Cli.RTLArgs
 import Verify.Verify
 import RTL.RTL
 
@@ -25,10 +26,4 @@ runApp = join $ execParser
 opts :: Parser (IO ())
 opts = hsubparser 
     (  command "verify" (info (verifyAll <$> parseVerifyArgs) (progDesc "Execute formal verification") )
-    <> command "rtl" (info (generateRTL <$> parseTopLevel) (progDesc "Generate RTL") ) )
-
-parseTopLevel :: Parser String
-parseTopLevel = strOption
-    (  long "toplevel"
-    <> short 't'
-    <> help "Top Level Entity")
+    <> command "rtl" (info (generateRTL <$> parseRTLArgs) (progDesc "Generate RTL") ) )

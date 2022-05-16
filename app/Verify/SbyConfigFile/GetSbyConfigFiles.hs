@@ -7,10 +7,13 @@ import Parsers.PSL
 import Parsers.FileExtensions.VHDL
 import Parsers.FileExtensions.PSL
 import Utils.FileSearch
+import Data.List
 
 getSbyConfigFiles :: SbyConfigArgs-> String -> String -> IO [SbyConfigFile]
 getSbyConfigFiles args srcPath vunitPath = do
-    (srcFiles, srcPaths) <- getVHDLSrcs srcPath
+    (srcFilesArr, srcPathsArr) <- getVHDLSrcs srcPath
+    let srcFiles = intercalate " " srcFilesArr
+    let srcPaths = intercalate "\n" srcPathsArr
     vunits <- getVunits srcPath vunitPath
     return (
         map
@@ -23,7 +26,6 @@ getSbyConfigFiles args srcPath vunitPath = do
             )
             vunits 
         )
-
 
 fileConcat :: String -> String -> String
 fileConcat files file = files ++ " " ++ file
