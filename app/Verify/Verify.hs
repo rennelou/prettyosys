@@ -32,11 +32,12 @@ verifyAll args = do
     verifications <- 
         mapM
             (\ sby -> do
-                putStrLn "\n"
-                putStrLn $ "\t\t\t" ++ (topLevel sby) ++ " verification"
+                putStrLn $ "\n\t\t\t" ++ (topLevel sby) ++ " verification"
 
+                putStrLn $ "\n" ++ " linting " ++ (topLevel sby) ++ "..."
                 callCommand $ ghdlLint sby
 
+                putStrLn $ "\n" ++ " verifing " ++ (topLevel sby) ++ "..."
                 verify args sby
             )
             sbys
