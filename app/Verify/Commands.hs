@@ -41,5 +41,8 @@ module Verify.Commands (
 
     ghdlLint :: Sby -> String
     ghdlLint sby = 
-        "ghdl -c --std=08 " ++ (unwords $ paths sby) ++ " -e " ++ (topLevel sby)
+        "cd verify_build &&" ++ 
+        "ghdl -c --std=08 " ++
+        (unwords $ map ("../" ++) (paths sby)) ++ 
+        " -e " ++ (topLevel sby)
        
