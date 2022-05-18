@@ -3,7 +3,7 @@ module Cli.VerifyArgs (
     VerifyArgs
 ) where
 
-import Verify.SbyCommand
+import Verify.Verify
 import Cli.Utils
 import Options.Applicative
 

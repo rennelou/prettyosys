@@ -1,18 +1,12 @@
-module Verify.SbyCommand (
+module Verify.Commands (
     SbyCommandArgs(..),
-    VerifyArgs(..),
     Mode(..),
-    sbyCommandWithConfigFile,
+    symbiyosys,
+    ghdlLint
 ) where
-    import Verify.SbyConfigFile.SbyConfigFile
+    import Verify.Sby
+    import Data.List
     import Text.Printf
-
-    data VerifyArgs = VerifyArgs {
-        getMode :: Mode,
-        getBackupFlag :: Bool,
-        getWorkDir :: String,
-        getDepht :: Int
-    } deriving (Show);
 
     data SbyCommandArgs = SbyCommandArgs {
         mode        :: Mode,
@@ -22,14 +16,14 @@ module Verify.SbyCommand (
 
     data Mode = CoverProve | Cover | Prove deriving (Read, Show);
 
-    sbyCommandWithConfigFile :: SbyCommandArgs -> SbyConfigFile -> String
-    sbyCommandWithConfigFile commandArgs sbyConfigFile =
+    symbiyosys :: SbyCommandArgs -> Sby -> String
+    symbiyosys commandArgs sbyConfigFile =
         printf "echo \"%s\" | %s" 
             (show sbyConfigFile)
-            (sbyCommand commandArgs (topLevel sbyConfigFile) )
+            (symbiyosys' commandArgs (topLevel sbyConfigFile) )
 
-    sbyCommand :: SbyCommandArgs -> String -> String
-    sbyCommand SbyCommandArgs{mode=mode, hasBackup=hasBackup, workdir=workdir} = 
+    symbiyosys' :: SbyCommandArgs -> String -> String
+    symbiyosys' SbyCommandArgs{mode=mode, hasBackup=hasBackup, workdir=workdir} = 
         printf 
             "sby --yosys \"yosys -m ghdl\" %s %s --prefix %s/%s"
             (sbyMode mode)
@@ -44,3 +38,8 @@ module Verify.SbyCommand (
     sbyBackupFlag :: Bool -> String
     sbyBackupFlag False = ""
     sbyBackupFlag True = "-b"
+
+    ghdlLint :: Sby -> String
+    ghdlLint sby = 
+        "ghdl -c --std=08 " ++ (unwords $ paths sby) ++ " -e " ++ (topLevel sby)
+       

@@ -3,3 +3,4 @@ src
 verification_units
 verify_build
 .vscode
+*.o

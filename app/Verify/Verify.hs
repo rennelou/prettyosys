@@ -1,10 +1,11 @@
 module Verify.Verify (
+    VerifyArgs(..),
+    Mode(..),
     verifyAll
 ) where
 
-import Verify.SbyCommand
-import Verify.SbyConfigFile.SbyConfigFile
-import Verify.SbyConfigFile.GetSbyConfigFiles
+import Verify.Commands as Commands
+import Verify.Sby
 import Verify.CoverPoint
 import Verify.Assertion
 import Verify.Error
@@ -18,47 +19,50 @@ import System.Exit (ExitCode)
 import System.Process.Typed
 import Control.Concurrent.STM (atomically)
 
+data VerifyArgs = VerifyArgs {
+        getMode :: Mode,
+        getBackupFlag :: Bool,
+        getWorkDir :: String,
+        getDepht :: Int
+    } deriving (Show);
+
 verifyAll :: VerifyArgs -> IO ()
 verifyAll args = do
-    let createSbyConfigFiles = getCreateSbyConfigFiles args
-    sbys <- createSbyConfigFiles "src" "verification_units"
-    
-    let createCommand = getCreateCommand args
+    sbys <- getSbys (SbyConfigArgs (getDepht args)) "src" "verification_units"
     verifications <- 
         mapM
             (\ sby -> do
                 putStrLn "\n"
                 putStrLn $ "\t\t\t" ++ (topLevel sby) ++ " verification"
-                out <- (execute . createCommand) sby
-                prettyPrint out
+
+                callCommand $ ghdlLint sby
+
+                verify args sby
             )
             sbys
     
     return ()
 
-getCreateCommand :: VerifyArgs-> SbyConfigFile -> String
-getCreateCommand = sbyCommandWithConfigFile.getSbyCommandArgs
-    where
-        getSbyCommandArgs :: VerifyArgs -> SbyCommandArgs
-        getSbyCommandArgs VerifyArgs{getMode=mode, getBackupFlag=backup, getWorkDir=workDir, getDepht=_} = 
-            SbyCommandArgs mode backup workDir
+verify :: VerifyArgs -> Sby -> IO ()
+verify args sby = do
+  
+    let symbiyosys' = Commands.symbiyosys (SbyCommandArgs (getMode args) (getBackupFlag args) (getWorkDir args))
+    out <- (readCommand . symbiyosys') sby
+    prettyPrint out
+  
+  where
+    prettyPrint :: BL.ByteString -> IO ()
+    prettyPrint out = do
+      putStrLn $ createCoverTable $ getCoverPoints out
+      putStrLn $ createAssertionTable (getBasecaseAssertion out) (getInductionAssertion out)
 
-getCreateSbyConfigFiles :: VerifyArgs -> String -> String -> IO [SbyConfigFile]
-getCreateSbyConfigFiles = getSbyConfigFiles . getSbyConfigArgs
-    where
-        getSbyConfigArgs :: VerifyArgs -> SbyConfigArgs
-        getSbyConfigArgs args =
-            SbyConfigArgs (getDepht args)
+      putStrLn $ getError out
+      putStrLn "\n"
 
-execute :: String -> IO BL.ByteString
-execute command = do
-    (_, out, _) <- readProcess $ shell command
-    return out
+readCommand :: String -> IO BL.ByteString
+readCommand command = do
+  (_, out, _) <- readProcess $ shell command
+  return out
 
-prettyPrint :: BL.ByteString -> IO ()
-prettyPrint out = do
-    putStrLn $ createCoverTable $ getCoverPoints out
-    putStrLn $ createAssertionTable (getBasecaseAssertion out) (getInductionAssertion out)
-
-    putStrLn $ getError out
-    putStrLn "\n"
+callCommand :: String -> IO ()
+callCommand = runProcess_ . shell
