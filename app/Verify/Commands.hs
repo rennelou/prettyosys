@@ -2,7 +2,7 @@ module Verify.Commands (
     SbyCommandArgs(..),
     Mode(..),
     symbiyosys,
-    ghdlLint
+    yosysLint
 ) where
     import Verify.Sby
     import Data.List
@@ -38,11 +38,14 @@ module Verify.Commands (
     sbyBackupFlag :: Bool -> String
     sbyBackupFlag False = ""
     sbyBackupFlag True = "-b"
-
-    ghdlLint :: Sby -> String
-    ghdlLint sby = 
-        "cd verify_build &&" ++ 
-        "ghdl -c --std=08 " ++
-        (unwords $ map ("../" ++) (paths sby)) ++ 
-        " -e " ++ (topLevel sby)
        
+    yosysLint :: Sby -> String
+    yosysLint sby = 
+        "cd verify_build; " ++
+        "yosys -m ghdl -qp " ++
+        "'" ++
+        "ghdl --std=08 " ++ (unwords $ map ("../" ++) (paths sby)) ++
+        " -e "++ (topLevel sby) ++"; " ++
+        "prep -top " ++ (topLevel sby) ++ "; " ++
+        "hierarchy -simcheck" ++
+        "'"

@@ -34,10 +34,10 @@ verifyAll args = do
             (\ sby -> do
                 putStrLn $ "\n\t\t\t" ++ (topLevel sby) ++ " verification"
 
-                putStrLn $ "\n" ++ " linting " ++ (topLevel sby) ++ "..."
-                callCommand $ ghdlLint sby
+                putStrLn $ "\n" ++ " linting " ++ (topLevel sby) ++ "...\n"
+                callCommand $ yosysLint sby
 
-                putStrLn $ "\n" ++ " verifing " ++ (topLevel sby) ++ "..."
+                putStrLn $ "\n" ++ " verifing " ++ (topLevel sby) ++ "...\n"
                 verify args sby
             )
             sbys

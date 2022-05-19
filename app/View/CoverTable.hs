@@ -8,6 +8,7 @@ import Text.Layout.Table
 import Text.Layout.Table.Cell.Formatted
 
 createCoverTable :: [CoverPoint] -> String
+createCoverTable [] = "Error executing Cover Task"
 createCoverTable covers = coverTable (map coverRow covers)
 
 coverTable :: [[Formatted String]] -> String
