@@ -7,12 +7,10 @@ import View.Utils
 import Text.Layout.Table
 import Text.Layout.Table.Cell.Formatted
 
-createAssertionTable :: Assertion -> Assertion -> String
-createAssertionTable (Assertion False 0 Nothing Nothing) (Assertion False 0 Nothing Nothing) = "Error Executing Prove Task"
-createAssertionTable basecase induction =
-    assertionTable [
-        assertionRow "Basecase" basecase, 
-        assertionRow "Induction" induction ]
+createAssertionTable :: [(String, Assertion)] -> String
+createAssertionTable [] = "Error Executing Prove Task"
+createAssertionTable assertions =
+    assertionTable (map (uncurry assertionRow) assertions)
 
 assertionTable :: [[Formatted String]] -> String
 assertionTable rows  = 

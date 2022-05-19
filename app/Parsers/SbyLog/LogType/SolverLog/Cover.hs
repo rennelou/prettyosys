@@ -24,6 +24,7 @@ data Cover =
     | CoverStep Integer
     | ReachedCoverPoint String Integer
     | UnreachdCoverPoint String
+    | CoverAssertFailed String String Integer
     | WritingCoverVCD String
     | WritingCoverTestbench String 
     | WritingCoverConstraint String 
@@ -38,6 +39,7 @@ pCover = do
             pCoverStep,
             pReachedCoverPoint,
             pUnreachdCoverPoint,
+            pCoverAssertFailed,
             pWritingCoverVCD,
             pWritingCoverTestbench,
             pWritingCoverConstraint,
@@ -69,6 +71,18 @@ pUnreachdCoverPoint = do
     _ <- pKeyword "Unreached cover statement at"
     coverPoint <- pProperty
     return (UnreachdCoverPoint coverPoint)
+
+pCoverAssertFailed :: TextParser Cover
+pCoverAssertFailed = do
+    _ <- pKeyword "Assert failed in"
+    entity <- pEntity
+    _ <- pCharsc ':'
+    property <- pProperty
+    _ <- pCharsc '('
+    _ <- pKeyword "step"
+    step <- integer
+    _ <- pCharsc ')'
+    return (CoverAssertFailed entity property step)
 
 pWritingCoverVCD :: TextParser Cover
 pWritingCoverVCD = do

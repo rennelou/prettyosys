@@ -1,5 +1,6 @@
 module Verify.Assertion (
     Assertion(..),
+    getCoverAssertion,
     getBasecaseAssertion,
     getInductionAssertion
 ) where
@@ -19,11 +20,31 @@ data Assertion = Assertion {
     _ATtrace            :: Maybe String
 } deriving (Show)
 
-getBasecaseAssertion :: BL.ByteString -> Assertion
-getBasecaseAssertion = (mapBasecaseToAssertion . getBasecaseLogs) . (T.decodeUtf8 . B.concat . BL.toChunks)
+getCoverAssertion :: BL.ByteString -> [(String, Assertion)]
+getCoverAssertion = 
+    (insertTag "Cover") . mapCoverToAssertion . getCoverLogs . T.decodeUtf8 . B.concat . BL.toChunks
 
-getInductionAssertion :: BL.ByteString -> Assertion
-getInductionAssertion = (mapInductionToAssertion . getInductionLogs) . (T.decodeUtf8 . B.concat . BL.toChunks)
+mapCoverToAssertion :: [Cover] -> [Assertion]
+mapCoverToAssertion = (map toAssertion) . getValidCoverEvents
+  where
+      toAssertion :: Cover -> Assertion
+      toAssertion (CoverAssertFailed entity name step) =
+        Assertion False step (Just name) Nothing
+      
+      toAssertion _ = error "Error converting Cover to Assertion"
+
+      getValidCoverEvents :: [Cover] -> [Cover]
+      getValidCoverEvents = filter isCoverValid
+        where
+          isCoverValid :: Cover -> Bool
+          isCoverValid (CoverAssertFailed _ _ _) = True
+          isCoverValid _ = False
+
+getBasecaseAssertion :: BL.ByteString -> [(String, Assertion)]
+getBasecaseAssertion = ((insertTag "Basecase") . toAssertionSingleton. mapBasecaseToAssertion . getBasecaseLogs) . (T.decodeUtf8 . B.concat . BL.toChunks)
+
+getInductionAssertion :: BL.ByteString -> [(String, Assertion)]
+getInductionAssertion = ((insertTag "Induction") . toAssertionSingleton . mapInductionToAssertion . getInductionLogs) . (T.decodeUtf8 . B.concat . BL.toChunks)
 
 mapBasecaseToAssertion :: [Basecase] -> Assertion
 mapBasecaseToAssertion = (mapToAssertion nextState) . getValidBasecaseEvents
@@ -72,6 +93,13 @@ mapInductionToAssertion = (mapToAssertion nextState) . getValidInductionEvents
                 isInductionValid (InductionStatus _) = True
                 isInductionValid (InductionStep _) = True
                 isInductionValid _ = False
+
+insertTag :: String -> [Assertion] -> [(String, Assertion)]
+insertTag tag = map (\ a -> (tag, a))
+
+toAssertionSingleton :: Assertion -> [Assertion]
+toAssertionSingleton (Assertion False 0 Nothing Nothing) = []
+toAssertionSingleton a = [a]
 
 mapToAssertion :: (Assertion -> a -> Assertion) -> [a] -> Assertion
 mapToAssertion nextState = foldl nextState (Assertion False 0 Nothing Nothing)

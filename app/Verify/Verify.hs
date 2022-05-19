@@ -54,8 +54,14 @@ verify args sby = do
   where
     prettyPrint :: BL.ByteString -> IO ()
     prettyPrint out = do
+      putStrLn $ "\n\t\t\tCover Points\n"
       putStrLn $ createCoverTable $ getCoverPoints out
-      putStrLn $ createAssertionTable (getBasecaseAssertion out) (getInductionAssertion out)
+      
+      putStrLn $ "\n\t\t\tAssertions\n"
+      putStrLn $ createAssertionTable
+          (  (getCoverAssertion out)
+          ++ (getBasecaseAssertion out)
+          ++ (getInductionAssertion out) )
 
       putStrLn $ getError out
       putStrLn "\n"

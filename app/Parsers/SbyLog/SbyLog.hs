@@ -62,7 +62,12 @@ getErrorLogs = (catMaybes.map errorFilter) . parseLogs
         errorFilter _ = Nothing
 
 parseLogs :: Text -> [SbyLog]
-parseLogs = (fromMaybe []) . (parseMaybe pSbyLog)
+parseLogs logTxt =
+    case logs of
+        Nothing -> error "Error parsing symbiyosys log"
+        Just (parsedLogs) -> parsedLogs
+  where
+    logs = parseMaybe pSbyLog logTxt
 
 pSbyLog :: TextParser [SbyLog]
 pSbyLog = 

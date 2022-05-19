@@ -27,8 +27,8 @@ prettyCoverName cp = formatted "" (_CPname cp) ""
 boolToReached :: CoverPoint -> Formatted String
 boolToReached cp = 
     case (_CPreached cp) of
-        True -> green "Passed"
-        False -> red "Failed"
+        True -> green "Reached"
+        False -> red "Unreached"
 
 prettyStep :: CoverPoint -> Formatted String
 prettyStep cp =
