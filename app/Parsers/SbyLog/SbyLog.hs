@@ -41,8 +41,8 @@ getBasecaseLogs :: Text -> [Basecase]
 getBasecaseLogs = catMaybes . (map getBaseCase) . parseLogs
     where
         getBaseCase :: SbyLog -> Maybe Basecase
-        getBaseCase SbyLogLine { taskPath=path, logline=(SolverType (BasecaseLog (AssertionWritingVCD trace))) } =
-            Just (AssertionWritingVCD (path ++ "/" ++ trace))
+        getBaseCase SbyLogLine { taskPath=path, logline=(SolverType (BasecaseLog (BasecaseWritingVCD trace))) } =
+            Just (BasecaseWritingVCD (path ++ "/" ++ trace))
         getBaseCase  SbyLogLine { taskPath=path, logline=(SolverType (BasecaseLog basecase)) } = Just basecase
         getBaseCase _ = Nothing
 
@@ -50,6 +50,8 @@ getInductionLogs :: Text -> [Induction]
 getInductionLogs = catMaybes . (map getInduction) . parseLogs
     where
         getInduction :: SbyLog -> Maybe Induction
+        getInduction SbyLogLine { taskPath=path, logline=(SolverType (InductionLog (InductionWritingVCD trace))) } =
+            Just (InductionWritingVCD (path ++ "/" ++ trace))
         getInduction SbyLogLine { taskPath=path, logline=(SolverType (InductionLog induction)) } =
             Just induction
         getInduction _ = Nothing

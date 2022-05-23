@@ -24,10 +24,10 @@ data Basecase =
     | AssumptionStep Integer
     | AssertionStep Integer
     | BMCFaild 
-    | AssertionFailed String String
-    | AssertionWritingVCD String 
-    | AssertionWritingTestbench String 
-    | AssertionWritingConstraints String 
+    | BasecaseFailed String String
+    | BasecaseWritingVCD String 
+    | BasecaseWritingTestbench String 
+    | BasecaseWritingConstraints String 
     | BasecaseStatus String deriving (Show)
 
 pBasecase :: TextParser Basecase
@@ -39,10 +39,10 @@ pBasecase = do
             pAssumptionStep,
             pAssertionStep,
             pBMCFaild,
-            pAssertionFailed,
-            pAssertionWritingVCD,
-            pAssertionWritingTestbench,
-            pAssertionWritingConstraints,
+            pBasecaseFailed,
+            pBasecaseWritingVCD,
+            pBasecaseWritingTestbench,
+            pBasecaseWritingConstraints,
             pBasecaseStatus
         ] )
 
@@ -65,28 +65,25 @@ pAssertionStep = do
 pBMCFaild :: TextParser Basecase
 pBMCFaild = BMCFaild <$ pKeyword "BMC failed!"
 
-pAssertionFailed :: TextParser Basecase
-pAssertionFailed = do
-    _ <- pKeyword "Assert failed in"
-    entity <- pEntity
-    _ <- pCharsc ':'
-    property <- pProperty
-    return (AssertionFailed entity property)
+pBasecaseFailed :: TextParser Basecase
+pBasecaseFailed = do
+    (entity, property) <- pAssertionFailed
+    return (BasecaseFailed entity property)
 
-pAssertionWritingVCD :: TextParser Basecase
-pAssertionWritingVCD = do
+pBasecaseWritingVCD :: TextParser Basecase
+pBasecaseWritingVCD = do
     vcd <- pWritingVCD
-    return (AssertionWritingVCD vcd)
+    return (BasecaseWritingVCD vcd)
 
-pAssertionWritingTestbench :: TextParser Basecase
-pAssertionWritingTestbench = do
+pBasecaseWritingTestbench :: TextParser Basecase
+pBasecaseWritingTestbench = do
     testbench <- pWritingTestbench
-    return (AssertionWritingTestbench testbench)
+    return (BasecaseWritingTestbench testbench)
 
-pAssertionWritingConstraints :: TextParser Basecase
-pAssertionWritingConstraints = do
+pBasecaseWritingConstraints :: TextParser Basecase
+pBasecaseWritingConstraints = do
     constraints <- pWritingConstraint
-    return (AssertionWritingConstraints constraints)
+    return (BasecaseWritingConstraints constraints)
 
 pBasecaseStatus :: TextParser Basecase
 pBasecaseStatus = do

@@ -5,6 +5,7 @@ module Parsers.SbyLog.Utils (
     pEntity,
     pProperty,
     pCheck,
+    pAssertionFailed,
     pWritingVCD,
     pWritingTestbench,
     pWritingConstraint,
@@ -35,6 +36,14 @@ pCheck checkType = do
     step <- integer
     _ <- pKeyword ".."
     return step
+
+pAssertionFailed :: TextParser (String, String)
+pAssertionFailed = do
+    _ <- pKeyword "Assert failed in"
+    entity <- pEntity
+    _ <- pCharsc ':'
+    property <- pProperty
+    return (entity, property)
 
 pWritingVCD :: TextParser String
 pWritingVCD = do

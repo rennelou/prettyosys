@@ -56,10 +56,10 @@ mapBasecaseToAssertion = (mapToAssertion nextState) . getValidBasecaseEvents
         nextState (Assertion passed _ name trace) (AssertionStep step) = 
             Assertion passed step name trace
         
-        nextState (Assertion passed step _ trace) (AssertionFailed _ name) = 
+        nextState (Assertion passed step _ trace) (BasecaseFailed _ name) = 
             Assertion passed step (Just name) trace
         
-        nextState (Assertion passed step name _) (AssertionWritingVCD trace) = 
+        nextState (Assertion passed step name _) (BasecaseWritingVCD trace) = 
             Assertion passed step name (Just trace)
         
         nextState _ _ = error "error creating assertion"
@@ -70,8 +70,8 @@ mapBasecaseToAssertion = (mapToAssertion nextState) . getValidBasecaseEvents
                 isBasecaseValid :: Basecase -> Bool
                 isBasecaseValid (BasecaseStatus _) = True
                 isBasecaseValid (AssertionStep _) = True
-                isBasecaseValid (AssertionFailed _ _) = True
-                isBasecaseValid (AssertionWritingVCD _) = True
+                isBasecaseValid (BasecaseFailed _ _) = True
+                isBasecaseValid (BasecaseWritingVCD _) = True
                 isBasecaseValid _ = False
 
 mapInductionToAssertion :: [Induction] -> Assertion
@@ -84,6 +84,12 @@ mapInductionToAssertion = (mapToAssertion nextState) . getValidInductionEvents
         nextState (Assertion passed _ name trace) (InductionStep step) = 
             Assertion passed step name trace
         
+        nextState (Assertion passed step _ trace) (IndutionAssertFaild _ name) = 
+            Assertion passed step (Just name) trace
+        
+        nextState (Assertion passed step name _) (InductionWritingVCD trace) = 
+            Assertion passed step name (Just trace)
+
         nextState _ _ = error "error creating assertion"
 
         getValidInductionEvents :: [Induction] -> [Induction]
@@ -92,6 +98,8 @@ mapInductionToAssertion = (mapToAssertion nextState) . getValidInductionEvents
                 isInductionValid :: Induction -> Bool
                 isInductionValid (InductionStatus _) = True
                 isInductionValid (InductionStep _) = True
+                isInductionValid (IndutionAssertFaild _ _) = True
+                isInductionValid (InductionWritingVCD _) = True
                 isInductionValid _ = False
 
 insertTag :: String -> [Assertion] -> [(String, Assertion)]

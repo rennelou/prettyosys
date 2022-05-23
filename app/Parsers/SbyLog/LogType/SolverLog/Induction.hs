@@ -22,7 +22,12 @@ import Parsers.TextParser
 data Induction = 
       InductionSolver String
     | InductionStep Integer 
-    | InductionSucess 
+    | InductionSucess
+    | InductionFailed
+    | IndutionAssertFaild String String
+    | InductionWritingVCD String
+    | InductionWritingTestbench String
+    | InductionWritingConstraints String
     | InductionStatus String deriving (Show)
 
 pInduction :: TextParser Induction
@@ -33,6 +38,11 @@ pInduction = do
             pInductionSolver,
             pInductionStep,
             pInductionSucess,
+            pInductionFailed,
+            pIndutionAssertFaild,
+            pInductionWritingVCD,
+            pInductionWritingTestbench,
+            pInductionWritingConstraints,
             pInductionStatus
         ] )
 
@@ -49,6 +59,29 @@ pInductionStep = do
 
 pInductionSucess :: TextParser Induction
 pInductionSucess = InductionSucess <$ pKeyword "Temporal induction successful."
+
+pInductionFailed :: TextParser Induction
+pInductionFailed = InductionFailed <$ pKeyword "Temporal induction failed!"
+
+pIndutionAssertFaild :: TextParser Induction
+pIndutionAssertFaild = do
+    (entity, property) <- pAssertionFailed
+    return (IndutionAssertFaild entity property)
+
+pInductionWritingVCD :: TextParser Induction
+pInductionWritingVCD = do
+    vcd <- pWritingVCD
+    return (InductionWritingVCD vcd)
+
+pInductionWritingTestbench :: TextParser Induction
+pInductionWritingTestbench = do
+    testbench <- pWritingTestbench
+    return (InductionWritingTestbench testbench)
+
+pInductionWritingConstraints :: TextParser Induction
+pInductionWritingConstraints = do
+    constraints <- pWritingConstraint
+    return (InductionWritingConstraints constraints)
 
 pInductionStatus :: TextParser Induction
 pInductionStatus = do
