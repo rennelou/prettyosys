@@ -28,7 +28,7 @@ pEntity :: TextParser String
 pEntity = lexeme (M.some (alphaNumChar <|> char '_') )
 
 pProperty :: TextParser String
-pProperty = lexeme (M.some (alphaNumChar <|> char '_' <|> char '.' <|> char ':') )
+pProperty = lexeme (M.some (alphaNumChar <|> char '_' <|> char '.' <|> char ':' <|> char '/') )
 
 pCheck :: String -> TextParser Integer
 pCheck checkType = do
