@@ -1,5 +1,5 @@
 module Utils.FileExtensionSearch (
-    getFilesAndPaths
+    getFiles
 ) where
 
 import Parsers.PSL
@@ -9,8 +9,8 @@ import System.FilePath
 import Data.Functor
 import Control.Monad
 
-getFilesAndPaths :: [String] -> FilePath -> IO ([FilePath], [FilePath])
-getFilesAndPaths extensions rootDir = do
+getFiles :: [String] -> FilePath -> IO ([FilePath], [FilePath])
+getFiles extensions rootDir = do
     (names, paths) <- getRecursiveContents rootDir <&> unzip
     let filtered_names = filterByExtesions extensions names
     let filtered_paths = filterByExtesions extensions paths
@@ -25,7 +25,9 @@ getRecursiveContents topDir = do
                     isDirectory <- doesDirectoryExist path
                     if isDirectory
                         then getRecursiveContents path
-                        else return [(name, path)] )
+                        else ( do
+                             absolutePath <- makeAbsolute path
+                             return [(name, absolutePath)] ))
                 names
     return (concat paths)
 
