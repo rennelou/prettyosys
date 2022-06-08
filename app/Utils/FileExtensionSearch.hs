@@ -1,6 +1,7 @@
 module Utils.FileExtensionSearch (
     getFileNames,
-    getFiles
+    getFiles,
+    tryRemoveDirectory
 ) where
 
 import Parsers.PSL
@@ -33,3 +34,8 @@ getRecursiveContents topDir = do
 
 filterByExtesions :: [String] -> [FilePath] -> [FilePath]
 filterByExtesions extensions = filter (\ path -> any (`isExtensionOf` path) extensions)
+
+tryRemoveDirectory :: String -> IO ()
+tryRemoveDirectory path = do
+    exists <- doesDirectoryExist path
+    when exists $ removeDirectoryRecursive path

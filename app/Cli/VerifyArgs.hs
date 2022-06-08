@@ -8,7 +8,12 @@ import Cli.Utils
 import Options.Applicative
 
 parseVerifyArgs :: Parser VerifyArgs
-parseVerifyArgs = VerifyArgs <$> parseMode <*> parseBackupFlag <*> parseWorkDir <*> parseDepht
+parseVerifyArgs = VerifyArgs 
+                    <$> parseMode
+                    <*> parseBackupFlag
+                    <*> parseReplaceFlag
+                    <*> parseWorkDir
+                    <*> parseDepht
 
 parseMode :: Parser Mode
 parseMode = option auto
@@ -31,3 +36,9 @@ parseBackupFlag = switch
     (  long "backup"
     <> short 'b'
     <> help "Backup actual work directory before run verification" )
+
+parseReplaceFlag :: Parser Bool
+parseReplaceFlag = switch
+    (  long "replace"
+    <> short 'r'
+    <> help "Replace actual work directory with the actual run verification" )
