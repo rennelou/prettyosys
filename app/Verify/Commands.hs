@@ -16,17 +16,17 @@ module Verify.Commands (
     data Mode = CoverProve | Cover | Prove deriving (Read, Show);
 
     symbiyosys :: SbyCommandArgs -> Sby -> String
-    symbiyosys commandArgs sbyConfigFile =
+    symbiyosys args sbyConfigFile =
         printf "echo \"%s\" | %s"
             (show sbyConfigFile)
-            (symbiyosys' commandArgs (topLevel sbyConfigFile))
+            (symbiyosys' args (topLevel sbyConfigFile))
 
     symbiyosys' :: SbyCommandArgs -> String -> String
-    symbiyosys' SbyCommandArgs{mode=mode, hasBackup=hasBackup} =
+    symbiyosys' args =
         printf
             "sby --yosys \"yosys -m ghdl\" %s %s --prefix %s"
-            (sbyMode mode)
-            (sbyBackupFlag hasBackup)
+            (sbyMode . mode $ args)
+            (sbyBackupFlag . hasBackup $ args)
 
     sbyMode :: Mode -> String
     sbyMode Cover = "-T cover"

@@ -1,6 +1,5 @@
 module Verify.Sby (
     Sby(..),
-    SbyConfigArgs(..),
     getSbys
 ) where
 
@@ -15,18 +14,14 @@ import Data.Maybe
 import Text.Megaparsec hiding (State)
 
 data Sby = Sby {
-    topLevel    :: String,
-    files       :: [String],
-    paths       :: [String],
-    configArgs  :: SbyConfigArgs
-}
-
-newtype SbyConfigArgs = SbyConfigArgs {
-    depht       :: Int
+    topLevel :: String,
+    files    :: [String],
+    paths    :: [String],
+    depht    :: Int
 }
 
 instance Show Sby where
-  show Sby {topLevel=topLevel, files=files, paths=paths, configArgs=args} =
+  show Sby {topLevel=topLevel, files=files, paths=paths, depht=depht} =
       sbyTasksConfig ++
       sbyEngineConfig ++
       sbyScriptsConfig ++
@@ -39,9 +34,9 @@ instance Show Sby where
         "prove\n" ++
         "[options]\n" ++
         "cover: mode cover\n" ++
-        printf "cover: depth %d\n" (depht args) ++
+        printf "cover: depth %d\n" depht ++
         "prove: mode prove\n" ++
-        printf "prove: depth %d\n" (depht args)
+        printf "prove: depth %d\n" depht
 
       sbyEngineConfig :: String
       sbyEngineConfig =
@@ -57,8 +52,8 @@ instance Show Sby where
       sbyFilesConfig :: String
       sbyFilesConfig = printf "[files]\n%s" (intercalate "\n" paths)
 
-getSbys :: SbyConfigArgs-> String -> String -> IO [Sby]
-getSbys args srcPath vunitPath = do
+getSbys :: Int -> String -> String -> IO [Sby]
+getSbys depht srcPath vunitPath = do
     srcPaths <- getFiles ["vhd", "vhdl"] srcPath
     let srcFileNames = getFileNames srcPaths
     vunits <- getVunits srcPath vunitPath
@@ -69,7 +64,7 @@ getSbys args srcPath vunitPath = do
                     (getTopLevel psl)
                     (srcFileNames ++ [file])
                     (srcPaths ++ [path])
-                    args
+                    depht
             )
             vunits
         )

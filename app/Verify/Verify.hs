@@ -28,7 +28,7 @@ data VerifyArgs = VerifyArgs {
 
 verifyAll :: VerifyArgs -> IO ()
 verifyAll args = do
-    sbys <- getSbys (SbyConfigArgs (getDepht args)) "src" "verification_units"
+    sbys <- getSbys (getDepht args) "src" "verification_units"
     _ <- createDirectoryIfMissing True (getWorkDir args)
     _ <- setCurrentDirectory (getWorkDir args)
     verifications <- 
