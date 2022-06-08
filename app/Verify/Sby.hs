@@ -87,13 +87,6 @@ getVunits srcPath vunitPath = do
         paths
 
 tryExtractPSLFile :: String -> String -> String -> Maybe (PSLFile, String, String)
-tryExtractPSLFile text file path =
-    if isJust maybePSL
-        then do
-            psl <- maybePSL
-            Just (psl, file, path)
-        else
-            Nothing
-
-    where
-        maybePSL = (parseMaybe pPSL . T.pack) text
+tryExtractPSLFile text file path = do
+    psl <- (parseMaybe pPSL . T.pack) text
+    return (psl, file, path)
