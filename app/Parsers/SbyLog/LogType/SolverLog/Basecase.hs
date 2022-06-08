@@ -23,7 +23,8 @@ data Basecase =
       BasecaseSolver String 
     | AssumptionStep Integer
     | AssertionStep Integer
-    | BMCFaild 
+    | BMCFaild
+    | FreeVarible String Integer
     | BasecaseFailed String String
     | BasecaseWritingVCD String 
     | BasecaseWritingTestbench String 
@@ -39,6 +40,7 @@ pBasecase = do
             pAssumptionStep,
             pAssertionStep,
             pBMCFaild,
+            pFreeVariable,
             pBasecaseFailed,
             pBasecaseWritingVCD,
             pBasecaseWritingTestbench,
@@ -64,6 +66,21 @@ pAssertionStep = do
 
 pBMCFaild :: TextParser Basecase
 pBMCFaild = BMCFaild <$ pKeyword "BMC failed!"
+
+pFreeVariable :: TextParser Basecase
+pFreeVariable = do
+    _ <- pKeyword "Value for"
+    freeBind <- T.unpack <$> pWord
+    _ <- pKeyword "in"
+    entity <- pWord
+    _ <- pBlock '(' ')'
+            ( do
+                _ <- char '/'
+                _ <- integer
+                return () )
+    _ <- pCharsc ':'
+    value <- integer
+    return (FreeVarible freeBind value)
 
 pBasecaseFailed :: TextParser Basecase
 pBasecaseFailed = do
