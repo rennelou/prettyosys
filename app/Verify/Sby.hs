@@ -6,10 +6,14 @@ module Verify.Sby (
 
 import Parsers.PSL
 import Utils.FileExtensionSearch
-import Data.List
-import Text.Printf
 
-data Sby = Sby {   
+import Data.List
+import qualified Data.Text as T
+import Text.Printf
+import Data.Maybe
+import Text.Megaparsec hiding (State)
+
+data Sby = Sby {
     topLevel    :: String,
     files       :: [String],
     paths       :: [String],
@@ -21,7 +25,7 @@ newtype SbyConfigArgs = SbyConfigArgs {
 }
 
 instance Show Sby where
-  show Sby {topLevel=topLevel, files=files, paths=paths, configArgs=args} = 
+  show Sby {topLevel=topLevel, files=files, paths=paths, configArgs=args} =
       sbyTasksConfig ++
       sbyEngineConfig ++
       sbyScriptsConfig ++
@@ -58,18 +62,40 @@ getSbys args srcPath vunitPath = do
     vunits <- getVunits srcPath vunitPath
     return (
         map
-            (\ (psl, file, path) -> 
-                Sby 
+            (\ (psl, file, path) ->
+                Sby
                     (getTopLevel psl)
                     (srcFiles ++ [file])
                     (srcPaths ++ [path])
-                    args 
+                    args
             )
-            vunits 
+            vunits
         )
 
-fileConcat :: String -> String -> String
-fileConcat files file = files ++ " " ++ file
+getVHDLSrcs :: String -> IO ([String], [String])
+getVHDLSrcs = getFilesAndPaths ["vhd", "vhdl"]
 
-pathConcat :: String -> String -> String
-pathConcat files file = files ++ "\n" ++ file
+getVunits :: String -> String -> IO [(PSLFile, String, String)]
+getVunits srcPath vunitPath = do
+    (srcFiles, srcPaths) <- getFilesAndPaths ["psl", "vhd", "vhdl"] srcPath
+    (testFiles, testPaths) <- getFilesAndPaths ["psl", "vhd", "vhdl"] vunitPath
+    let files = srcFiles ++ testFiles
+    let paths = srcPaths ++ testPaths
+    let pairs = zip files paths
+    catMaybes <$> mapM ( \ (file, path) ->
+        do
+            text <- readFile path
+            return (tryExtractPSLFile text file path) )
+          pairs
+
+tryExtractPSLFile :: String -> String -> String -> Maybe (PSLFile, String, String)
+tryExtractPSLFile text file path =
+    if isJust maybePSL
+        then do
+            psl <- maybePSL
+            Just (psl, file, path)
+        else
+            Nothing
+
+    where
+        maybePSL = (parseMaybe pPSL . T.pack) text

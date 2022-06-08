@@ -16,7 +16,7 @@ data RTLArgs = RTLArgs {
 
 generateRTL :: RTLArgs -> IO ()
 generateRTL RTLArgs { toplevel=toplevel, workdir=workdir } = do
-    (_, srcsPathArr) <- getVHDLSrcs "src"
+    (_, srcsPathArr) <- getFilesAndPaths ["vhd", "vhdl"] "src"
     let srcsPathArr_2 = map ("../" ++) srcsPathArr
     let srcs = unwords srcsPathArr_2
     runProcess_ $ shell $ yosysRTL srcs toplevel workdir
