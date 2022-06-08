@@ -35,10 +35,10 @@ parseBackupFlag :: Parser Bool
 parseBackupFlag = switch
     (  long "backup"
     <> short 'b'
-    <> help "Backup actual work directory before run verification" )
+    <> help "Backup old work directory before run verification" )
 
 parseReplaceFlag :: Parser Bool
 parseReplaceFlag = switch
     (  long "replace"
     <> short 'r'
-    <> help "Replace actual work directory with the actual run verification" )
+    <> help "Remove old work directories before run verification" )
