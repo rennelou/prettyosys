@@ -1,5 +1,4 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards   #-}
 
 module Parsers.SbyLog.LogType.LogType (
     LogType(..),
@@ -33,8 +32,7 @@ pLogType = choice [
 
 pSolverType :: TextParser LogType
 pSolverType = do
-    solverType <- pSolverLog
-    return (SolverType solverType)
+    SolverType <$> pSolverLog
 
 pSbyCommand :: TextParser LogType
 pSbyCommand = lexeme pLine

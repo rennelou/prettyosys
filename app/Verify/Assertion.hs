@@ -1,9 +1,13 @@
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Use tuple-section" #-}
 module Verify.Assertion (
     Assertion(..),
     getCoverAssertion,
     getBasecaseAssertion,
     getInductionAssertion
 ) where
+
+import System.Directory
 
 import Parsers.SbyLog.SbyLog
 import Text.Megaparsec hiding (State)
@@ -20,48 +24,53 @@ data Assertion = Assertion {
     _ATtrace            :: Maybe String
 } deriving (Show)
 
-getCoverAssertion :: BL.ByteString -> [(String, Assertion)]
-getCoverAssertion = 
-    (insertTag "Cover") . mapCoverToAssertion . getCoverLogs . T.decodeUtf8 . B.concat . BL.toChunks
+getCoverAssertion :: BL.ByteString -> IO [(String, Assertion)]
+getCoverAssertion text = do
+    currentDirectory <- getCurrentDirectory
+    return ((insertTag "Cover" . mapCoverToAssertion . getCoverLogs currentDirectory . T.decodeUtf8 . B.concat . BL.toChunks) text)
 
 mapCoverToAssertion :: [Cover] -> [Assertion]
-mapCoverToAssertion = (map toAssertion) . getValidCoverEvents
+mapCoverToAssertion = map toAssertion . getValidCoverEvents
   where
       toAssertion :: Cover -> Assertion
       toAssertion (CoverAssertFailed entity name step) =
         Assertion False step (Just name) Nothing
-      
+
       toAssertion _ = error "Error converting Cover to Assertion"
 
       getValidCoverEvents :: [Cover] -> [Cover]
       getValidCoverEvents = filter isCoverValid
         where
           isCoverValid :: Cover -> Bool
-          isCoverValid (CoverAssertFailed _ _ _) = True
+          isCoverValid CoverAssertFailed {} = True
           isCoverValid _ = False
 
-getBasecaseAssertion :: BL.ByteString -> [(String, Assertion)]
-getBasecaseAssertion = ((insertTag "Basecase") . toAssertionSingleton. mapBasecaseToAssertion . getBasecaseLogs) . (T.decodeUtf8 . B.concat . BL.toChunks)
+getBasecaseAssertion :: BL.ByteString -> IO [(String, Assertion)]
+getBasecaseAssertion text = do
+    currentDirectory <- getCurrentDirectory
+    return ((insertTag "Basecase" . toAssertionSingleton. mapBasecaseToAssertion . getBasecaseLogs currentDirectory . T.decodeUtf8 . B.concat . BL.toChunks) text)
 
-getInductionAssertion :: BL.ByteString -> [(String, Assertion)]
-getInductionAssertion = ((insertTag "Induction") . toAssertionSingleton . mapInductionToAssertion . getInductionLogs) . (T.decodeUtf8 . B.concat . BL.toChunks)
+getInductionAssertion :: BL.ByteString -> IO [(String, Assertion)]
+getInductionAssertion text = do
+    currentDirectory <- getCurrentDirectory
+    return ((insertTag "Induction" . toAssertionSingleton . mapInductionToAssertion . getInductionLogs currentDirectory . T.decodeUtf8 . B.concat . BL.toChunks) text)
 
 mapBasecaseToAssertion :: [Basecase] -> Assertion
-mapBasecaseToAssertion = (mapToAssertion nextState) . getValidBasecaseEvents
+mapBasecaseToAssertion = mapToAssertion nextState . getValidBasecaseEvents
     where
         nextState :: Assertion -> Basecase -> Assertion
-        nextState (Assertion _ step name trace) (BasecaseStatus passed) = 
+        nextState (Assertion _ step name trace) (BasecaseStatus passed) =
             Assertion (statusToBool passed) step name trace
-        
-        nextState (Assertion passed _ name trace) (AssertionStep step) = 
+
+        nextState (Assertion passed _ name trace) (AssertionStep step) =
             Assertion passed step name trace
-        
-        nextState (Assertion passed step _ trace) (BasecaseFailed _ name) = 
+
+        nextState (Assertion passed step _ trace) (BasecaseFailed _ name) =
             Assertion passed step (Just name) trace
-        
-        nextState (Assertion passed step name _) (BasecaseWritingVCD trace) = 
+
+        nextState (Assertion passed step name _) (BasecaseWritingVCD trace) =
             Assertion passed step name (Just trace)
-        
+
         nextState _ _ = error "error creating assertion"
 
         getValidBasecaseEvents :: [Basecase] -> [Basecase]
@@ -75,19 +84,19 @@ mapBasecaseToAssertion = (mapToAssertion nextState) . getValidBasecaseEvents
                 isBasecaseValid _ = False
 
 mapInductionToAssertion :: [Induction] -> Assertion
-mapInductionToAssertion = (mapToAssertion nextState) . getValidInductionEvents
+mapInductionToAssertion = mapToAssertion nextState . getValidInductionEvents
     where
         nextState :: Assertion -> Induction -> Assertion
-        nextState (Assertion _ step name trace) (InductionStatus passed) = 
+        nextState (Assertion _ step name trace) (InductionStatus passed) =
             Assertion (statusToBool passed) step name trace
-        
-        nextState (Assertion passed _ name trace) (InductionStep step) = 
+
+        nextState (Assertion passed _ name trace) (InductionStep step) =
             Assertion passed step name trace
-        
-        nextState (Assertion passed step _ trace) (IndutionAssertFaild _ name) = 
+
+        nextState (Assertion passed step _ trace) (IndutionAssertFaild _ name) =
             Assertion passed step (Just name) trace
-        
-        nextState (Assertion passed step name _) (InductionWritingVCD trace) = 
+
+        nextState (Assertion passed step name _) (InductionWritingVCD trace) =
             Assertion passed step name (Just trace)
 
         nextState _ _ = error "error creating assertion"

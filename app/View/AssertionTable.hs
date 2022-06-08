@@ -13,7 +13,7 @@ createAssertionTable assertions =
     assertionTable (map (uncurry assertionRow) assertions)
 
 assertionTable :: [[Formatted String]] -> String
-assertionTable rows  = 
+assertionTable rows  =
     tableString [def, def, def, def, def]
                 unicodeS
                 (titlesH ["Mode", "Status", "Step", "Assertion Failed", "Trace"])
@@ -24,23 +24,21 @@ assertionRow mode ass =
     [simpleFormettedString mode, boolToPass ass, prettyStep ass, prettyAssertionName ass, prettyTrace ass]
 
 boolToPass :: Assertion -> Formatted String
-boolToPass ass = 
-    case (_ATpassed ass) of
-        True -> green "Passed"
-        False -> red "Failed"
+boolToPass ass =
+    if _ATpassed ass then green "Passed" else red "Failed"
 
 prettyStep :: Assertion -> Formatted String
 prettyStep ass = simpleFormettedString (show (_ATstep ass))
 
 prettyAssertionName :: Assertion -> Formatted String
 prettyAssertionName ass =
-    case (_ATassertionFailed ass) of
+    case _ATassertionFailed ass of
         (Just s) -> simpleFormettedString s
         Nothing -> simpleFormettedString ""
 
 prettyTrace :: Assertion -> Formatted String
 prettyTrace ass =
-    case (_ATtrace ass) of
+    case _ATtrace ass of
         (Just trace) -> simpleFormettedString trace
         Nothing -> simpleFormettedString ""
 

@@ -1,5 +1,4 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards   #-}
 
 module Parsers.SbyLog.LogType.SolverLog.Basecase (
     Basecase(..),
@@ -8,6 +7,7 @@ module Parsers.SbyLog.LogType.SolverLog.Basecase (
 
 import Parsers.SbyLog.Utils
 
+import System.Directory
 import Control.Monad
 import Data.Maybe
 import Data.Text (Text)
@@ -19,16 +19,16 @@ import qualified Text.Megaparsec.Char.Lexer as L
 import qualified Text.Megaparsec as M
 import Parsers.TextParser
 
-data Basecase = 
-      BasecaseSolver String 
+data Basecase =
+      BasecaseSolver String
     | AssumptionStep Integer
     | AssertionStep Integer
     | BMCFaild
     | FreeVarible String Integer
     | BasecaseFailed String String
-    | BasecaseWritingVCD String 
-    | BasecaseWritingTestbench String 
-    | BasecaseWritingConstraints String 
+    | BasecaseWritingVCD String
+    | BasecaseWritingTestbench String
+    | BasecaseWritingConstraints String
     | BasecaseStatus String deriving (Show)
 
 pBasecase :: TextParser Basecase
@@ -79,8 +79,7 @@ pFreeVariable = do
                 _ <- integer
                 return () )
     _ <- pCharsc ':'
-    value <- integer
-    return (FreeVarible freeBind value)
+    FreeVarible freeBind <$> integer
 
 pBasecaseFailed :: TextParser Basecase
 pBasecaseFailed = do
@@ -89,23 +88,19 @@ pBasecaseFailed = do
 
 pBasecaseWritingVCD :: TextParser Basecase
 pBasecaseWritingVCD = do
-    vcd <- pWritingVCD
-    return (BasecaseWritingVCD vcd)
+    BasecaseWritingVCD <$> pWritingVCD
 
 pBasecaseWritingTestbench :: TextParser Basecase
 pBasecaseWritingTestbench = do
-    testbench <- pWritingTestbench
-    return (BasecaseWritingTestbench testbench)
+    BasecaseWritingTestbench <$> pWritingTestbench
 
 pBasecaseWritingConstraints :: TextParser Basecase
 pBasecaseWritingConstraints = do
-    constraints <- pWritingConstraint
-    return (BasecaseWritingConstraints constraints)
+    BasecaseWritingConstraints <$> pWritingConstraint
 
 pBasecaseStatus :: TextParser Basecase
 pBasecaseStatus = do
-    status <- pStatus
-    return (BasecaseStatus status)
+    BasecaseStatus <$> pStatus
 
 pEngineBasecase :: TextParser ()
 pEngineBasecase = do

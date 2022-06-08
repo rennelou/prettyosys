@@ -1,5 +1,4 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards   #-}
 
 module Parsers.SbyLog.Utils (
     pEntity,
@@ -48,26 +47,22 @@ pAssertionFailed = do
 pWritingVCD :: TextParser String
 pWritingVCD = do
     _ <- pKeyword "Writing trace to VCD file:"
-    trace <- T.unpack <$> pPath
-    return trace
+    T.unpack <$> pPath
 
 pWritingTestbench :: TextParser String
 pWritingTestbench = do
     _ <- pKeyword "Writing trace to Verilog testbench:"
-    testbench <- T.unpack <$> pPath
-    return testbench
+    T.unpack <$> pPath
 
 pWritingConstraint :: TextParser String
 pWritingConstraint = do
     _ <- pKeyword "Writing trace to constraints file:"
-    constraints <- T.unpack <$> pPath
-    return constraints
+    T.unpack <$> pPath
 
 pStatus :: TextParser String
 pStatus = do
     _ <- pKeyword "Status:"
-    status <- T.unpack <$> pWord
-    return status
+    T.unpack <$> pWord
 
 pAnything :: TextParser String
 pAnything = M.many (satisfy (/= '\n'))
