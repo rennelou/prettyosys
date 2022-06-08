@@ -4,11 +4,10 @@ module Utils.FileExtensionSearch (
 ) where
 
 import Parsers.PSL
-import Parsers.FileExtensions.VHDL
-import Parsers.FileExtensions.PSL
 
 import System.Directory
 import System.FilePath
+import Data.Functor
 import Control.Monad
 import Data.Maybe
 import qualified Data.Text as T
@@ -22,22 +21,34 @@ getVHDLSrcs srcPath = do
     let paths = filterVHDLExtension paths_arr
     return (files, paths)
 
+filterVHDLExtension :: [FilePath] -> [FilePath]
+filterVHDLExtension =
+    filter (\ path -> 
+               isExtensionOf "vhd" path
+            || isExtensionOf "vhdl" path )
+
 getVunits :: String -> String -> IO [(PSLFile, String, String)]
 getVunits srcPath vunitPath = do
     (srcFiles, srcPaths) <- getFilesAndPaths srcPath
     (testFiles, testPaths) <- getFilesAndPaths vunitPath
-    let files = (filterPSLExtension srcFiles) ++ (filterPSLExtension testFiles)
-    let paths = (filterPSLExtension srcPaths) ++ (filterPSLExtension testPaths)
+    let files = filterPSLExtension srcFiles ++ filterPSLExtension testFiles
+    let paths = filterPSLExtension srcPaths ++ filterPSLExtension testPaths
     let pairs = zip files paths
-    pslMaybes <- ( mapM
-            ( \ (file, path) -> do
-                text <- readFile path
-                return (tryExtractPSLFile text file path) )
-            pairs )
-    return (catMaybes pslMaybes)
+    catMaybes <$> mapM ( \ (file, path) ->
+        do
+            text <- readFile path
+            return (tryExtractPSLFile text file path) )
+          pairs
+
+filterPSLExtension :: [FilePath] -> [FilePath]
+filterPSLExtension = 
+    filter (\ path -> 
+              isExtensionOf "psl" path
+           || isExtensionOf "vhd" path
+           || isExtensionOf "vhdl" path )
 
 getFilesAndPaths :: FilePath -> IO ([FilePath], [FilePath])
-getFilesAndPaths rootDir = (getRecursiveContents rootDir) >>= return.unzip  
+getFilesAndPaths rootDir = getRecursiveContents rootDir <&> unzip
 
 getRecursiveContents :: FilePath -> IO [(FilePath,FilePath)]
 getRecursiveContents topDir = do
@@ -62,5 +73,5 @@ tryExtractPSLFile text file path =
             Nothing
 
     where
-        maybePSL = ((parseMaybe pPSL) . T.pack) text
+        maybePSL = (parseMaybe pPSL . T.pack) text
     

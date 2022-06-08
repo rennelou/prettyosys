@@ -32,12 +32,12 @@ verifyAll args = do
     verifications <- 
         mapM
             (\ sby -> do
-                putStrLn $ "\n\t\t\t" ++ (topLevel sby) ++ " verification"
+                putStrLn $ "\n\t\t\t" ++ topLevel sby ++ " verification"
 
-                putStrLn $ "\n" ++ " linting " ++ (topLevel sby) ++ "...\n"
+                putStrLn $ "\n" ++ " linting " ++ topLevel sby ++ "...\n"
                 callCommand $ yosysLint sby
 
-                putStrLn $ "\n" ++ " verifing " ++ (topLevel sby) ++ "...\n"
+                putStrLn $ "\n" ++ " verifing " ++ topLevel sby ++ "...\n"
                 verify args sby
             )
             sbys
@@ -54,14 +54,14 @@ verify args sby = do
   where
     prettyPrint :: BL.ByteString -> IO ()
     prettyPrint out = do
-      putStrLn $ "\n\t\t\tCover Points\n"
+      putStrLn "\n\t\t\tCover Points\n"
       putStrLn $ createCoverTable $ getCoverPoints out
       
-      putStrLn $ "\n\t\t\tAssertions\n"
+      putStrLn "\n\t\t\tAssertions\n"
       putStrLn $ createAssertionTable
-          (  (getCoverAssertion out)
-          ++ (getBasecaseAssertion out)
-          ++ (getInductionAssertion out) )
+          (  getCoverAssertion out
+          ++ getBasecaseAssertion out
+          ++ getInductionAssertion out )
 
       putStrLn $ getError out
       putStrLn "\n"

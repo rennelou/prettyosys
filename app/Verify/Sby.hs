@@ -5,8 +5,6 @@ module Verify.Sby (
 ) where
 
 import Parsers.PSL
-import Parsers.FileExtensions.VHDL
-import Parsers.FileExtensions.PSL
 import Utils.FileExtensionSearch
 import Data.List
 import Text.Printf
@@ -18,7 +16,7 @@ data Sby = Sby {
     configArgs  :: SbyConfigArgs
 }
 
-data SbyConfigArgs = SbyConfigArgs {
+newtype SbyConfigArgs = SbyConfigArgs {
     depht       :: Int
 }
 
@@ -36,9 +34,9 @@ instance Show Sby where
         "prove\n" ++
         "[options]\n" ++
         "cover: mode cover\n" ++
-        (printf "cover: depth %d\n" (depht args)) ++
+        printf "cover: depth %d\n" (depht args) ++
         "prove: mode prove\n" ++
-        (printf "prove: depth %d\n" (depht args))
+        printf "prove: depth %d\n" (depht args)
 
       sbyEngineConfig :: String
       sbyEngineConfig =
@@ -48,8 +46,8 @@ instance Show Sby where
       sbyScriptsConfig :: String
       sbyScriptsConfig =
         "[script]\n" ++
-        (printf "ghdl --std=08 %s -e %s\n" (unwords files) topLevel) ++
-        (printf "prep -top %s\n" topLevel)
+        printf "ghdl --std=08 %s -e %s\n" (unwords files) topLevel ++
+        printf "prep -top %s\n" topLevel
 
       sbyFilesConfig :: String
       sbyFilesConfig = printf "[files]\n%s" (intercalate "\n" paths)

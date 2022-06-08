@@ -1,5 +1,4 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards   #-}
 
 module Parsers.PSL (
     PSLFile(..),
@@ -44,15 +43,14 @@ pPSL = do
     return (PSLFile vunitType unitName hdl)
 
 pVunitType :: TextParser VunitType
-pVunitType = choice 
+pVunitType = choice
     [ VUnit <$ pKeyword "vunit"
     , VProp <$ pKeyword "vprop"
     , VMode <$ pKeyword "vmode" ]
 
 pBlockBody :: TextParser ()
-pBlockBody = 
+pBlockBody =
     pVunitItens
-    <|> empty
 
 pVunitItens :: TextParser ()
 pVunitItens =
@@ -72,8 +70,8 @@ pAnyWord :: TextParser String
 pAnyWord = lexeme (M.some pAnyChar)
 
 pAnyChar :: TextParser Char
-pAnyChar = 
-    alphaNumChar 
+pAnyChar =
+    alphaNumChar
     <|> char '_'
     <|> char '-'
     <|> char '='
