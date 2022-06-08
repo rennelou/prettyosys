@@ -16,8 +16,8 @@ data RTLArgs = RTLArgs {
 
 generateRTL :: RTLArgs -> IO ()
 generateRTL RTLArgs { toplevel=toplevel, workdir=workdir } = do
-    srcs <- unwords . snd <$> getFiles ["vhd", "vhdl"] "src"
-    runProcess_ $ shell $ yosysRTL srcs toplevel workdir
+    paths <- unwords <$> getFiles ["vhd", "vhdl"] "src"
+    runProcess_ $ shell $ yosysRTL paths toplevel workdir
 
 yosysRTL :: String -> String -> String -> String
 yosysRTL srcs toplevel workdir = 

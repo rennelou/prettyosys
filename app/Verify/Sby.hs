@@ -8,6 +8,7 @@ import Parsers.PSL
 import Utils.FileExtensionSearch
 
 import Data.List
+import System.FilePath
 import qualified Data.Text as T
 import Text.Printf
 import Data.Maybe
@@ -58,14 +59,15 @@ instance Show Sby where
 
 getSbys :: SbyConfigArgs-> String -> String -> IO [Sby]
 getSbys args srcPath vunitPath = do
-    (srcFiles, srcPaths) <- getFiles ["vhd", "vhdl"] srcPath
+    srcPaths <- getFiles ["vhd", "vhdl"] srcPath
+    let srcFileNames = getFileNames srcPaths
     vunits <- getVunits srcPath vunitPath
     return (
         map
             (\ (psl, file, path) ->
                 Sby
                     (getTopLevel psl)
-                    (srcFiles ++ [file])
+                    (srcFileNames ++ [file])
                     (srcPaths ++ [path])
                     args
             )
@@ -74,16 +76,15 @@ getSbys args srcPath vunitPath = do
 
 getVunits :: String -> String -> IO [(PSLFile, String, String)]
 getVunits srcPath vunitPath = do
-    (srcFiles, srcPaths) <- getFiles ["psl", "vhd", "vhdl"] srcPath
-    (testFiles, testPaths) <- getFiles ["psl", "vhd", "vhdl"] vunitPath
-    let files = srcFiles ++ testFiles
+    srcPaths <- getFiles ["psl", "vhd", "vhdl"] srcPath
+    testPaths <- getFiles ["psl", "vhd", "vhdl"] vunitPath
     let paths = srcPaths ++ testPaths
-    let pairs = zip files paths
-    catMaybes <$> mapM ( \ (file, path) ->
+    catMaybes <$> mapM ( \ path ->
         do
             text <- readFile path
-            return (tryExtractPSLFile text file path) )
-          pairs
+            let fileName = takeFileName path
+            return (tryExtractPSLFile text fileName path) )
+        paths
 
 tryExtractPSLFile :: String -> String -> String -> Maybe (PSLFile, String, String)
 tryExtractPSLFile text file path =

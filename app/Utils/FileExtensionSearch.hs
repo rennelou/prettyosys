@@ -1,4 +1,5 @@
 module Utils.FileExtensionSearch (
+    getFileNames,
     getFiles
 ) where
 
@@ -9,14 +10,13 @@ import System.FilePath
 import Data.Functor
 import Control.Monad
 
-getFiles :: [String] -> FilePath -> IO ([FilePath], [FilePath])
-getFiles extensions rootDir = do
-    (names, paths) <- getRecursiveContents rootDir <&> unzip
-    let filtered_names = filterByExtesions extensions names
-    let filtered_paths = filterByExtesions extensions paths
-    return (filtered_names, filtered_paths)
+getFileNames :: [FilePath] -> [String]
+getFileNames = map takeFileName
 
-getRecursiveContents :: FilePath -> IO [(FilePath,FilePath)]
+getFiles :: [String] -> FilePath -> IO [FilePath]
+getFiles extensions rootDir = filterByExtesions extensions <$> getRecursiveContents rootDir 
+
+getRecursiveContents :: FilePath -> IO [FilePath]
 getRecursiveContents topDir = do
     names <- listDirectory topDir
     paths <- mapM
@@ -27,7 +27,7 @@ getRecursiveContents topDir = do
                         then getRecursiveContents path
                         else ( do
                              absolutePath <- makeAbsolute path
-                             return [(name, absolutePath)] ))
+                             return [absolutePath] ))
                 names
     return (concat paths)
 
