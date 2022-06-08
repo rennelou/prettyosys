@@ -64,18 +64,15 @@ verify args sby = do
     prettyPrint :: BL.ByteString -> IO ()
     prettyPrint out = do
       putStrLn "\n\t\t\tCover Points\n"
-      coverPoints <- getCoverPoints out
-      putStrLn $ createCoverTable coverPoints
+      currentDirectory <- getCurrentDirectory 
 
-      coverAssertions <- getCoverAssertion out
-      basecaseAssertions <- getBasecaseAssertion out
-      inductionAssertions <- getInductionAssertion out
+      putStrLn $ createCoverTable $ getCoverPoints currentDirectory out
       
       putStrLn "\n\t\t\tAssertions\n"
       putStrLn $ createAssertionTable
-          (  coverAssertions
-          ++ basecaseAssertions
-          ++ inductionAssertions )
+          (  getCoverAssertion currentDirectory out
+          ++ getBasecaseAssertion currentDirectory out
+          ++ getInductionAssertion currentDirectory out )
 
       putStrLn $ getError out
       putStrLn "\n"

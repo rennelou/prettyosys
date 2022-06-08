@@ -10,6 +10,7 @@ module Parsers.SbyLog.SbyLog (
     Induction(..)
 ) where
 
+import System.FilePath
 import Parsers.SbyLog.Utils
 import Parsers.SbyLog.LogType.LogType
 import Control.Monad
@@ -31,17 +32,17 @@ getCoverLogs :: FilePath -> Text -> [Cover]
 getCoverLogs currentDirectory = mapMaybe getCover . parseLogs
     where
         getCover :: SbyLog -> Maybe Cover
-        getCover SbyLogLine { taskPath=_, logline=(SolverType (CoverLog (WritingCoverVCD trace))) } =
-            Just (WritingCoverVCD (currentDirectory ++ "/" ++ trace))
-        getCover SbyLogLine { taskPath=path, logline=(SolverType (CoverLog cover)) } = Just cover
+        getCover SbyLogLine { taskPath=path, logline=(SolverType (CoverLog (WritingCoverVCD trace))) } =
+            Just (WritingCoverVCD (currentDirectory </> path </> trace))
+        getCover SbyLogLine { taskPath=_, logline=(SolverType (CoverLog cover)) } = Just cover
         getCover _ = Nothing
 
 getBasecaseLogs :: FilePath -> Text -> [Basecase]
 getBasecaseLogs currentDirectory = mapMaybe getBaseCase . parseLogs
     where
         getBaseCase :: SbyLog -> Maybe Basecase
-        getBaseCase SbyLogLine { taskPath=_, logline=(SolverType (BasecaseLog (BasecaseWritingVCD trace))) } =
-            Just (BasecaseWritingVCD (currentDirectory ++ "/" ++ trace))
+        getBaseCase SbyLogLine { taskPath=path, logline=(SolverType (BasecaseLog (BasecaseWritingVCD trace))) } =
+            Just (BasecaseWritingVCD (currentDirectory </> path </> trace))
         getBaseCase  SbyLogLine { taskPath=_, logline=(SolverType (BasecaseLog basecase)) } = Just basecase
         getBaseCase _ = Nothing
 
@@ -49,8 +50,8 @@ getInductionLogs :: FilePath -> Text -> [Induction]
 getInductionLogs currentDirectory = mapMaybe getInduction . parseLogs
     where
         getInduction :: SbyLog -> Maybe Induction
-        getInduction SbyLogLine { taskPath=_, logline=(SolverType (InductionLog (InductionWritingVCD trace))) } =
-            Just (InductionWritingVCD (currentDirectory ++ "/" ++ trace))
+        getInduction SbyLogLine { taskPath=path, logline=(SolverType (InductionLog (InductionWritingVCD trace))) } =
+            Just (InductionWritingVCD (currentDirectory </> path </> trace))
         getInduction SbyLogLine { taskPath=_, logline=(SolverType (InductionLog induction)) } =
             Just induction
         getInduction _ = Nothing

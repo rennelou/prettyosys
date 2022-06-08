@@ -24,10 +24,9 @@ data Assertion = Assertion {
     _ATtrace            :: Maybe String
 } deriving (Show)
 
-getCoverAssertion :: BL.ByteString -> IO [(String, Assertion)]
-getCoverAssertion text = do
-    currentDirectory <- getCurrentDirectory
-    return ((insertTag "Cover" . mapCoverToAssertion . getCoverLogs currentDirectory . T.decodeUtf8 . B.concat . BL.toChunks) text)
+getCoverAssertion :: FilePath -> BL.ByteString -> [(String, Assertion)]
+getCoverAssertion currentDirectory =
+    insertTag "Cover" . mapCoverToAssertion . getCoverLogs currentDirectory . T.decodeUtf8 . B.concat . BL.toChunks
 
 mapCoverToAssertion :: [Cover] -> [Assertion]
 mapCoverToAssertion = map toAssertion . getValidCoverEvents
@@ -45,15 +44,13 @@ mapCoverToAssertion = map toAssertion . getValidCoverEvents
           isCoverValid CoverAssertFailed {} = True
           isCoverValid _ = False
 
-getBasecaseAssertion :: BL.ByteString -> IO [(String, Assertion)]
-getBasecaseAssertion text = do
-    currentDirectory <- getCurrentDirectory
-    return ((insertTag "Basecase" . toAssertionSingleton. mapBasecaseToAssertion . getBasecaseLogs currentDirectory . T.decodeUtf8 . B.concat . BL.toChunks) text)
+getBasecaseAssertion :: FilePath -> BL.ByteString -> [(String, Assertion)]
+getBasecaseAssertion currentDirectory =
+    insertTag "Basecase" . toAssertionSingleton. mapBasecaseToAssertion . getBasecaseLogs currentDirectory . T.decodeUtf8 . B.concat . BL.toChunks
 
-getInductionAssertion :: BL.ByteString -> IO [(String, Assertion)]
-getInductionAssertion text = do
-    currentDirectory <- getCurrentDirectory
-    return ((insertTag "Induction" . toAssertionSingleton . mapInductionToAssertion . getInductionLogs currentDirectory . T.decodeUtf8 . B.concat . BL.toChunks) text)
+getInductionAssertion :: FilePath -> BL.ByteString -> [(String, Assertion)]
+getInductionAssertion currentDirectory =
+    insertTag "Induction" . toAssertionSingleton . mapInductionToAssertion . getInductionLogs currentDirectory . T.decodeUtf8 . B.concat . BL.toChunks
 
 mapBasecaseToAssertion :: [Basecase] -> Assertion
 mapBasecaseToAssertion = mapToAssertion nextState . getValidBasecaseEvents

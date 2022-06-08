@@ -25,10 +25,9 @@ data CoverGroupState = CoverGroupState {
     coverPoints :: [CoverPoint]
 }
 
-getCoverPoints :: BL.ByteString -> IO [CoverPoint]
-getCoverPoints text = do
-    currentDirectory <- getCurrentDirectory
-    return ((mapToCoverPoints . getCoverLogs currentDirectory . T.decodeUtf8 . B.concat . BL.toChunks) text)
+getCoverPoints :: FilePath -> BL.ByteString -> [CoverPoint]
+getCoverPoints currentDirectory =
+    mapToCoverPoints . getCoverLogs currentDirectory . T.decodeUtf8 . B.concat . BL.toChunks
 
 mapToCoverPoints :: [Cover] -> [CoverPoint]
 mapToCoverPoints  = coverPoints . foldl nextState (CoverGroupState [] []) . getValidCoverEvents
@@ -42,7 +41,7 @@ mapToCoverPoints  = coverPoints . foldl nextState (CoverGroupState [] []) . getV
 
         nextState CoverGroupState {buffer=buffer,coverPoints=coverPoints} (WritingCoverVCD trace) =
             CoverGroupState [] (coverPoints ++ map (createReachedCoverPoint trace) buffer)
-        
+
         nextState _ _ = error "Invalid state when creating cover points"
 
         createReachedCoverPoint :: String -> Cover -> CoverPoint
