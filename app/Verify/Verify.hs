@@ -15,7 +15,7 @@ import View.AssertionTable
 import qualified Data.ByteString.Lazy as BL
 
 import System.IO
-import System.Exit (ExitCode)
+import System.Directory
 import System.Process.Typed
 import Control.Concurrent.STM (atomically)
 
@@ -29,6 +29,8 @@ data VerifyArgs = VerifyArgs {
 verifyAll :: VerifyArgs -> IO ()
 verifyAll args = do
     sbys <- getSbys (SbyConfigArgs (getDepht args)) "src" "verification_units"
+    _ <- createDirectoryIfMissing True (getWorkDir args)
+    _ <- setCurrentDirectory (getWorkDir args)
     verifications <- 
         mapM
             (\ sby -> do
@@ -47,7 +49,7 @@ verifyAll args = do
 verify :: VerifyArgs -> Sby -> IO ()
 verify args sby = do
   
-    let symbiyosys' = Commands.symbiyosys (SbyCommandArgs (getMode args) (getBackupFlag args) (getWorkDir args))
+    let symbiyosys' = Commands.symbiyosys (SbyCommandArgs (getMode args) (getBackupFlag args))
     out <- (readCommand . symbiyosys') sby
     prettyPrint out
   

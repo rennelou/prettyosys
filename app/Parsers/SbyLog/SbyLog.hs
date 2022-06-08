@@ -1,5 +1,4 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards   #-}
 
 module Parsers.SbyLog.SbyLog (
     getCoverLogs,
@@ -24,12 +23,12 @@ import qualified Text.Megaparsec.Char.Lexer as L
 import qualified Text.Megaparsec as M
 import Parsers.TextParser
 
-data SbyLog = 
+data SbyLog =
       SbyLogLine { taskPath :: String, logline :: LogType }
     | Error String deriving (Show)
 
 getCoverLogs :: Text -> [Cover]
-getCoverLogs = catMaybes . (map getCover) . parseLogs
+getCoverLogs = mapMaybe getCover . parseLogs
     where
         getCover :: SbyLog -> Maybe Cover
         getCover SbyLogLine { taskPath=path, logline=(SolverType (CoverLog (WritingCoverVCD trace))) } =
@@ -38,7 +37,7 @@ getCoverLogs = catMaybes . (map getCover) . parseLogs
         getCover _ = Nothing
 
 getBasecaseLogs :: Text -> [Basecase]
-getBasecaseLogs = catMaybes . (map getBaseCase) . parseLogs
+getBasecaseLogs = mapMaybe getBaseCase . parseLogs
     where
         getBaseCase :: SbyLog -> Maybe Basecase
         getBaseCase SbyLogLine { taskPath=path, logline=(SolverType (BasecaseLog (BasecaseWritingVCD trace))) } =
@@ -47,7 +46,7 @@ getBasecaseLogs = catMaybes . (map getBaseCase) . parseLogs
         getBaseCase _ = Nothing
 
 getInductionLogs :: Text -> [Induction]
-getInductionLogs = catMaybes . (map getInduction) . parseLogs
+getInductionLogs = mapMaybe getInduction . parseLogs
     where
         getInduction :: SbyLog -> Maybe Induction
         getInduction SbyLogLine { taskPath=path, logline=(SolverType (InductionLog (InductionWritingVCD trace))) } =
@@ -57,7 +56,7 @@ getInductionLogs = catMaybes . (map getInduction) . parseLogs
         getInduction _ = Nothing
 
 getErrorLogs :: Text -> [String]
-getErrorLogs = (catMaybes.map errorFilter) . parseLogs
+getErrorLogs = mapMaybe errorFilter . parseLogs
     where
         errorFilter :: SbyLog -> Maybe String
         errorFilter (Error error) = Just error
@@ -67,12 +66,12 @@ parseLogs :: Text -> [SbyLog]
 parseLogs logTxt =
     case logs of
         Nothing -> error "Error parsing symbiyosys log"
-        Just (parsedLogs) -> parsedLogs
+        Just parsedLogs -> parsedLogs
   where
     logs = parseMaybe pSbyLog logTxt
 
 pSbyLog :: TextParser [SbyLog]
-pSbyLog = 
+pSbyLog =
     choice [
         M.some (lexeme pError),
         M.some (lexeme pSbyLogLine) ]
@@ -80,8 +79,7 @@ pSbyLog =
 pSbyLogLine :: TextParser SbyLog
 pSbyLogLine = do
     path <- pSbyHeader
-    logline <- pLogType
-    return (SbyLogLine path logline)
+    SbyLogLine path <$> pLogType
 
 pSbyHeader :: TextParser String
 pSbyHeader = do
@@ -92,5 +90,4 @@ pSbyHeader = do
 pError :: TextParser SbyLog
 pError = do
     _ <- pKeyword "ERROR:"
-    error <- (pAnything <* char '\n')
-    return (Error error)
+    Error <$> (pAnything <* char '\n')

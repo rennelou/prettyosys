@@ -10,8 +10,7 @@ module Verify.Commands (
 
     data SbyCommandArgs = SbyCommandArgs {
         mode        :: Mode,
-        hasBackup   :: Bool,
-        workdir     :: String
+        hasBackup   :: Bool
     }
 
     data Mode = CoverProve | Cover | Prove deriving (Read, Show);
@@ -20,15 +19,14 @@ module Verify.Commands (
     symbiyosys commandArgs sbyConfigFile =
         printf "echo \"%s\" | %s"
             (show sbyConfigFile)
-            (symbiyosys' commandArgs (topLevel sbyConfigFile) )
+            (symbiyosys' commandArgs (topLevel sbyConfigFile))
 
     symbiyosys' :: SbyCommandArgs -> String -> String
-    symbiyosys' SbyCommandArgs{mode=mode, hasBackup=hasBackup, workdir=workdir} =
+    symbiyosys' SbyCommandArgs{mode=mode, hasBackup=hasBackup} =
         printf
-            "sby --yosys \"yosys -m ghdl\" %s %s --prefix %s/%s"
+            "sby --yosys \"yosys -m ghdl\" %s %s --prefix %s"
             (sbyMode mode)
             (sbyBackupFlag hasBackup)
-            workdir
 
     sbyMode :: Mode -> String
     sbyMode Cover = "-T cover"
@@ -41,7 +39,6 @@ module Verify.Commands (
 
     yosysLint :: Sby -> String
     yosysLint sby =
-        "cd verify_build; " ++
         "yosys -m ghdl -qp " ++
         "'" ++
         "ghdl --std=08 " ++ unwords (paths sby) ++
