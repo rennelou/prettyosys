@@ -25,8 +25,8 @@ data Assertion = Assertion {
 } deriving (Show)
 
 getCoverAssertion :: FilePath -> BL.ByteString -> [(String, Assertion)]
-getCoverAssertion currentDirectory =
-    insertTag "Cover" . mapCoverToAssertion . getCoverLogs currentDirectory . T.decodeUtf8 . B.concat . BL.toChunks
+getCoverAssertion workdir =
+    insertTag "Cover" . mapCoverToAssertion . getCoverLogs workdir . T.decodeUtf8 . B.concat . BL.toChunks
 
 mapCoverToAssertion :: [Cover] -> [Assertion]
 mapCoverToAssertion = map toAssertion . getValidCoverEvents
@@ -45,12 +45,12 @@ mapCoverToAssertion = map toAssertion . getValidCoverEvents
           isCoverValid _ = False
 
 getBasecaseAssertion :: FilePath -> BL.ByteString -> [(String, Assertion)]
-getBasecaseAssertion currentDirectory =
-    insertTag "Basecase" . toAssertionSingleton. mapBasecaseToAssertion . getBasecaseLogs currentDirectory . T.decodeUtf8 . B.concat . BL.toChunks
+getBasecaseAssertion workdir =
+    insertTag "Basecase" . toAssertionSingleton. mapBasecaseToAssertion . getBasecaseLogs workdir . T.decodeUtf8 . B.concat . BL.toChunks
 
 getInductionAssertion :: FilePath -> BL.ByteString -> [(String, Assertion)]
-getInductionAssertion currentDirectory =
-    insertTag "Induction" . toAssertionSingleton . mapInductionToAssertion . getInductionLogs currentDirectory . T.decodeUtf8 . B.concat . BL.toChunks
+getInductionAssertion workdir =
+    insertTag "Induction" . toAssertionSingleton . mapInductionToAssertion . getInductionLogs workdir . T.decodeUtf8 . B.concat . BL.toChunks
 
 mapBasecaseToAssertion :: [Basecase] -> Assertion
 mapBasecaseToAssertion = mapToAssertion nextState . getValidBasecaseEvents

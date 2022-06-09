@@ -26,8 +26,8 @@ data CoverGroupState = CoverGroupState {
 }
 
 getCoverPoints :: FilePath -> BL.ByteString -> [CoverPoint]
-getCoverPoints currentDirectory =
-    mapToCoverPoints . getCoverLogs currentDirectory . T.decodeUtf8 . B.concat . BL.toChunks
+getCoverPoints workdir =
+    mapToCoverPoints . getCoverLogs workdir . T.decodeUtf8 . B.concat . BL.toChunks
 
 mapToCoverPoints :: [Cover] -> [CoverPoint]
 mapToCoverPoints  = coverPoints . foldl nextState (CoverGroupState [] []) . getValidCoverEvents
