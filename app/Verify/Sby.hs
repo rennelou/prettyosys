@@ -52,11 +52,15 @@ instance Show Sby where
       sbyFilesConfig :: String
       sbyFilesConfig = printf "[files]\n%s" (intercalate "\n" paths)
 
-getSbys :: Int -> String -> String -> IO [Sby]
-getSbys depht srcPath vunitPath = do
+getSbys :: String -> Int -> String -> String -> IO [Sby]
+getSbys uut depht srcPath vunitPath = do
+    
     srcPaths <- getFiles ["vhd", "vhdl"] srcPath
     let srcFileNames = getFileNames srcPaths
+    
     vunits <- getVunits srcPath vunitPath
+    let filteredVunits = filterByUut uut vunits
+
     return (
         map
             (\ (psl, file, path) ->
@@ -66,7 +70,7 @@ getSbys depht srcPath vunitPath = do
                     (srcPaths ++ [path])
                     depht
             )
-            vunits
+            filteredVunits
         )
 
 getVunits :: String -> String -> IO [(PSLFile, String, String)]
@@ -80,8 +84,12 @@ getVunits srcPath vunitPath = do
             let fileName = takeFileName path
             return (tryExtractPSLFile text fileName path) )
         paths
+  where
+    tryExtractPSLFile :: String -> String -> String -> Maybe (PSLFile, String, String)
+    tryExtractPSLFile text file path = do
+      psl <- (parseMaybe pPSL . T.pack) text
+      return (psl, file, path)
 
-tryExtractPSLFile :: String -> String -> String -> Maybe (PSLFile, String, String)
-tryExtractPSLFile text file path = do
-    psl <- (parseMaybe pPSL . T.pack) text
-    return (psl, file, path)
+filterByUut :: String -> [(PSLFile, String, String)] -> [(PSLFile, String, String)]
+filterByUut "" vunits = vunits
+filterByUut uut vunits = filter (\ (psl, file, path) -> getTopLevel psl == uut) vunits

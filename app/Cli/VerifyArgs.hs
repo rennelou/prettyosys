@@ -10,6 +10,7 @@ import Options.Applicative
 parseVerifyArgs :: Parser VerifyArgs
 parseVerifyArgs = VerifyArgs 
                     <$> parseMode
+                    <*> parseTopLevel
                     <*> parseBackupFlag
                     <*> parseReplaceFlag
                     <*> parseWorkDir
@@ -22,6 +23,13 @@ parseMode = option auto
     <> showDefault
     <> value CoverProve
     <> help "Mode cover, prove or cover and prove" )
+
+parseTopLevel :: Parser String
+parseTopLevel = strOption
+    (  long "uut"
+    <> short 'u'
+    <> value ""
+    <> help "Unit under the test" )
 
 parseDepht :: Parser Int
 parseDepht = option auto

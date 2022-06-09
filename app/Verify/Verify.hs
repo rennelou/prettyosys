@@ -24,6 +24,7 @@ import Control.Monad
 
 data VerifyArgs = VerifyArgs {
         getMode :: Mode,
+        getTopLevel :: String,
         getBackupFlag :: Bool,
         getReplaceFlag :: Bool,
         getWorkDir :: String,
@@ -32,9 +33,12 @@ data VerifyArgs = VerifyArgs {
 
 verifyAll :: VerifyArgs -> IO ()
 verifyAll args = do
-    sbys <- getSbys (getDepht args) "src" "verification_units"
+    
+    sbys <- getSbys (getTopLevel args) (getDepht args) "src" "verification_units"
+
     createDirectoryIfMissing True (getWorkDir args)
     setCurrentDirectory (getWorkDir args)
+    
     verifications <-
         mapM
             (\ sby -> do
@@ -63,10 +67,10 @@ verify args sby = do
   where
     prettyPrint :: BL.ByteString -> IO ()
     prettyPrint out = do
-      putStrLn "\n\t\t\tCover Points\n" 
+      putStrLn "\n\t\t\tCover Points\n"
 
       putStrLn $ createCoverTable $ getCoverPoints (getWorkDir args) out
-      
+
       putStrLn "\n\t\t\tAssertions\n"
       putStrLn $ createAssertionTable
           (  getCoverAssertion (getWorkDir args) out
@@ -86,7 +90,7 @@ callCommand = runProcess_ . shell
 
 removeOldDirectoriesWhenHolds :: Bool -> String -> IO ()
 removeOldDirectoriesWhenHolds flag topLevel =
-    when flag (do 
+    when flag (do
       tryRemoveDirectory (topLevel ++ "_cover")
       tryRemoveDirectory (topLevel ++ "_prove")
       return ())
