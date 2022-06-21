@@ -70,11 +70,46 @@ executable prettyosys
 Test-Suite test
     type:          exitcode-stdio-1.0
     main-is:       Test.hs
+    
+    other-modules: Cli.RunApp,
+                   Cli.VerifyArgs,
+                   Cli.RTLArgs,
+                   Cli.Utils,
+                   RTL.RTL,
+                   Verify.Verify,
+                   Verify.Commands,
+                   Verify.Sby,
+                   Verify.CoverPoint,
+                   Verify.Assertion,
+                   Verify.Error,
+                   View.CoverTable,
+                   View.AssertionTable,
+                   View.Utils,
+                   Parsers.TextParser,
+                   Parsers.PSL,
+                   Parsers.SbyLog.SbyLog,
+                   Parsers.SbyLog.Utils,
+                   Parsers.SbyLog.LogType.LogType,
+                   Parsers.SbyLog.LogType.SolverLog.SolverLog,
+                   Parsers.SbyLog.LogType.SolverLog.Cover,
+                   Parsers.SbyLog.LogType.SolverLog.Basecase,
+                   Parsers.SbyLog.LogType.SolverLog.Induction,
+                   Utils.FileExtensionSearch
+    
     build-depends: base,
                    tasty,
                    tasty-smallcheck,
                    tasty-quickcheck,
-                   tasty-hunit
+                   tasty-hunit,
+                   directory ^>=1.3.6.0,
+                   filepath ^>=1.4.2.1,
+                   text ^>=1.2.4.1,
+                   typed-process,
+                   bytestring ^>=0.10.12.0,
+                   stm ^>=2.5.0.1,
+                   optparse-applicative,
+                   megaparsec,
+                   table-layout ^>= 0.9.1.0
     
-    hs-source-dirs: tests
+    hs-source-dirs: tests, app
     default-language: Haskell2010

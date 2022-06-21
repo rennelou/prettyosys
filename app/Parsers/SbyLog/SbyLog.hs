@@ -5,6 +5,7 @@ module Parsers.SbyLog.SbyLog (
     getBasecaseLogs,
     getInductionLogs,
     getErrorLogs,
+    parseLogs,
     Cover(..),
     Basecase(..),
     Induction(..)
