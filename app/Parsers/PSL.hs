@@ -86,3 +86,5 @@ pAnyChar =
     <|> char ':'
     <|> char ';'
     <|> char '/'
+    <|> char '|'
+    <|> char '!'
