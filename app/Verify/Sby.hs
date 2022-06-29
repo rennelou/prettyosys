@@ -60,14 +60,16 @@ getSbys uut depht srcPath vunitPath = do
     
     vunits <- getVunits srcPath vunitPath
     let filteredVunits = filterByUut uut vunits
+    let vunitFile = getVunitFiles vunits
+    let vunitPaths = getVunitPaths vunits
 
     return (
         map
             (\ (psl, file, path) ->
                 Sby
                     (getTopLevel psl)
-                    (srcFileNames ++ [file])
-                    (srcPaths ++ [path])
+                    (srcFileNames ++ vunitFile)
+                    (srcPaths ++ vunitPaths)
                     depht
             )
             filteredVunits
@@ -93,3 +95,9 @@ getVunits srcPath vunitPath = do
 filterByUut :: String -> [(PSLFile, String, String)] -> [(PSLFile, String, String)]
 filterByUut "" vunits = vunits
 filterByUut uut vunits = filter (\ (psl, file, path) -> getTopLevel psl == uut) vunits
+
+getVunitFiles :: [(PSLFile, String, String)] -> [String]
+getVunitFiles = map (\ (_, file, path) -> file)
+
+getVunitPaths :: [(PSLFile, String, String)] -> [String]
+getVunitPaths = map (\ (_, file, path) -> path)
