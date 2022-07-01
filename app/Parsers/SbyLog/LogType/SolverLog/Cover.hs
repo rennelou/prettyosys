@@ -19,15 +19,16 @@ import qualified Text.Megaparsec.Char.Lexer as L
 import qualified Text.Megaparsec as M
 import Parsers.TextParser
 
-data Cover = 
+data Cover =
       SolverCover String
     | CoverStep Integer
     | ReachedCoverPoint String Integer
     | UnreachdCoverPoint String
     | CoverAssertFailed String String Integer
+    | WaitingSolver Integer
     | WritingCoverVCD String
-    | WritingCoverTestbench String 
-    | WritingCoverConstraint String 
+    | WritingCoverTestbench String
+    | WritingCoverConstraint String
     | CoverStatus String deriving (Show)
 
 pCover :: TextParser Cover
@@ -40,6 +41,7 @@ pCover = do
             pReachedCoverPoint,
             pUnreachdCoverPoint,
             pCoverAssertFailed,
+            pWaitingSolver,
             pWritingCoverVCD,
             pWritingCoverTestbench,
             pWritingCoverConstraint,
@@ -69,8 +71,7 @@ pReachedCoverPoint = do
 pUnreachdCoverPoint :: TextParser Cover
 pUnreachdCoverPoint = do
     _ <- pKeyword "Unreached cover statement at"
-    coverPoint <- pProperty
-    return (UnreachdCoverPoint coverPoint)
+    UnreachdCoverPoint <$> pProperty
 
 pCoverAssertFailed :: TextParser Cover
 pCoverAssertFailed = do
@@ -84,25 +85,31 @@ pCoverAssertFailed = do
     _ <- pCharsc ')'
     return (CoverAssertFailed entity property step)
 
+pWaitingSolver :: TextParser Cover
+pWaitingSolver = do
+    _ <- pKeyword "waiting for solver"
+    _ <- pCharsc '('
+    time <- integer
+    _ <- pKeyword "minute"
+    _ <- pCharsc ')'
+    return (WaitingSolver time)
+
+
 pWritingCoverVCD :: TextParser Cover
 pWritingCoverVCD = do
-    trace <- pWritingVCD
-    return (WritingCoverVCD trace)
+    WritingCoverVCD <$> pWritingVCD
 
 pWritingCoverTestbench :: TextParser Cover
 pWritingCoverTestbench = do
-    testbench <- pWritingTestbench
-    return (WritingCoverTestbench testbench)
+    WritingCoverTestbench <$> pWritingTestbench
 
 pWritingCoverConstraint :: TextParser Cover
 pWritingCoverConstraint = do
-    constraints <- pWritingConstraint
-    return (WritingCoverConstraint constraints)
+    WritingCoverConstraint <$> pWritingConstraint
 
 pCoverStatus :: TextParser Cover
 pCoverStatus = do
-    status <- pStatus
-    return (CoverStatus status)
+    CoverStatus <$> pStatus
 
 pEngineCover :: TextParser ()
 pEngineCover = do
