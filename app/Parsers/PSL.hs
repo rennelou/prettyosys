@@ -67,25 +67,4 @@ pAnyPhrase :: TextParser [String]
 pAnyPhrase = lexeme (M.some pAnyWord)
 
 pAnyWord :: TextParser String
-pAnyWord = lexeme (M.some pAnyChar)
-
-pAnyChar :: TextParser Char
-pAnyChar =
-    alphaNumChar
-    <|> char '_'
-    <|> char '-'
-    <|> char '='
-    <|> char '<'
-    <|> char '>'
-    <|> char ','
-    <|> char '.'
-    <|> char '+'
-    <|> char '*'
-    <|> char '"'
-    <|> char '\''
-    <|> char ':'
-    <|> char ';'
-    <|> char '/'
-    <|> char '|'
-    <|> char '!'
-    <|> char '&'
+pAnyWord = lexeme (M.some symbolChar)

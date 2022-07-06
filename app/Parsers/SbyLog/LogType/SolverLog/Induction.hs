@@ -1,5 +1,4 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards   #-}
 
 module Parsers.SbyLog.LogType.SolverLog.Induction (
     Induction(..),
@@ -19,9 +18,9 @@ import qualified Text.Megaparsec.Char.Lexer as L
 import qualified Text.Megaparsec as M
 import Parsers.TextParser
 
-data Induction = 
+data Induction =
       InductionSolver String
-    | InductionStep Integer 
+    | InductionStep Integer
     | InductionSucess
     | InductionFailed
     | IndutionAssertFaild String String
@@ -70,23 +69,19 @@ pIndutionAssertFaild = do
 
 pInductionWritingVCD :: TextParser Induction
 pInductionWritingVCD = do
-    vcd <- pWritingVCD
-    return (InductionWritingVCD vcd)
+    InductionWritingVCD <$> pWritingVCD
 
 pInductionWritingTestbench :: TextParser Induction
 pInductionWritingTestbench = do
-    testbench <- pWritingTestbench
-    return (InductionWritingTestbench testbench)
+    InductionWritingTestbench <$> pWritingTestbench
 
 pInductionWritingConstraints :: TextParser Induction
 pInductionWritingConstraints = do
-    constraints <- pWritingConstraint
-    return (InductionWritingConstraints constraints)
+    InductionWritingConstraints <$> pWritingConstraint
 
 pInductionStatus :: TextParser Induction
 pInductionStatus = do
-    status <- pStatus
-    return (InductionStatus status)
+    InductionStatus <$> pStatus
 
 pEngineInduction :: TextParser ()
 pEngineInduction = do
