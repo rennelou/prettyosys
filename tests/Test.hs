@@ -23,7 +23,7 @@ sbyLogTests = testGroup "Sby Log Parser Tests" [coverSbyLogTest, proveSbyLogTest
 coverSbyLogTest :: TestTree
 coverSbyLogTest =
   testCase  "Cover Sby Log Parse"
-  $ assertParseSbyLog
+  $ parseTest pSbyLog . T.pack
   $    "SBY 18:50:12 [ram_cover] Copy '/mnt/c/git/atg.mdadapter/src/mocks/memory_mock.vhd' to '/mnt/c/git/atg.mdadapter/verify_build/ram_cover/src/memory_mock.vhd'.\n"
     ++ "SBY 18:50:13 [ram_cover] engine_0: smtbmc\n"
     ++ "SBY 18:50:13 [ram_cover] base: starting process \"cd ram_cover/src; yosys -m ghdl -ql ../model/design.log ../model/design.ys\"\n"
@@ -50,7 +50,7 @@ coverSbyLogTest =
 proveSbyLogTest :: TestTree
 proveSbyLogTest =
   testCase "Prove Sby Log Parse"
-  $ assertParseSbyLog
+  $ parseTest pSbyLog . T.pack
   $    "SBY 18:50:13 [ram_prove] Copy '/mnt/c/git/atg.mdadapter/src/mocks/memory_mock.vhd' to '/mnt/c/git/atg.mdadapter/verify_build/ram_prove/src/memory_mock.vhd'.\n"
     ++ "SBY 18:50:13 [ram_prove] engine_0: smtbmc\n"
     ++ "SBY 18:50:13 [ram_prove] base: starting process \"cd ram_prove/src; yosys -m ghdl -ql ../model/design.log ../model/design.ys\"\n"
@@ -79,19 +79,13 @@ proveSbyLogTest =
     ++ "SBY 18:50:14 [ram_prove] summary: successful proof by k-induction.\n"
     ++ "SBY 18:50:14 [ram_prove] DONE (PASS, rc=0)\n"
 
-assertParseSbyLog :: String -> IO ()
-assertParseSbyLog log = 
-  case runParser pSbyLog "" . T.pack $ log of
-    Left error -> ioError (userError $ errorBundlePretty error)
-    Right result -> return ()
-
 pslLogTests :: TestTree
 pslLogTests = testGroup "PSL Parser Tests" [pslTest]
 
 pslTest :: TestTree
 pslTest =
   testCase "PSL Parse"
-  $ assertParsePSL
+  $ parseTest pPSL . T.pack
   $    "vunit linked_list_vu(linked_list(linked_list_rtl))\n"
     ++ "{\n"
     ++ "default clock is rising_edge(clk);\n"
@@ -123,9 +117,3 @@ pslTest =
     ++  ") abort rst;\n"
     ++  "--------------------------------------------------------------------------\n"
     ++  "}\n"
-
-assertParsePSL :: String -> IO ()
-assertParsePSL psl = 
-  case runParser pPSL "" (T.pack psl) of
-    Left error -> ioError (userError $ errorBundlePretty error)
-    Right _    -> return ()

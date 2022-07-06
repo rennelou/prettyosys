@@ -53,44 +53,43 @@ instance Show Sby where
       sbyFilesConfig = printf "[files]\n%s" (intercalate "\n" paths)
 
 getSbys :: String -> Int -> String -> String -> IO [Sby]
-getSbys uut depht srcPath vunitPath = do
-    
-    srcPaths <- getFiles ["vhd", "vhdl"] srcPath
-    let srcFileNames = getFileNames srcPaths
-    
-    vunits <- getVunits srcPath vunitPath
-    let filteredVunits = filterByUut uut vunits
-    let vunitFile = getVunitFiles vunits
-    let vunitPaths = getVunitPaths vunits
+getSbys uut depht srcPath vunitPath = do  
+  srcPaths <- getFiles ["vhd", "vhdl"] srcPath
+  let srcFileNames = getFileNames srcPaths
+   
+  vunits <- getVunits srcPath vunitPath
+  let filteredVunits = filterByUut uut vunits
+  let vunitFile = getVunitFiles vunits
+  let vunitPaths = getVunitPaths vunits
 
-    return (
-        map
-            (\ (psl, file, path) ->
-                Sby
-                    (getTopLevel psl)
-                    (srcFileNames ++ vunitFile)
-                    (srcPaths ++ vunitPaths)
-                    depht
-            )
-            filteredVunits
-        )
+  return (
+      map
+          (\ (psl, file, path) ->
+              Sby
+                  (getTopLevel psl)
+                  (srcFileNames ++ vunitFile)
+                  (srcPaths ++ vunitPaths)
+                  depht
+          )
+          filteredVunits
+      )
 
 getVunits :: String -> String -> IO [(PSLFile, String, String)]
 getVunits srcPath vunitPath = do
     srcPaths <- getFiles ["psl", "vhd", "vhdl"] srcPath
     testPaths <- getFiles ["psl", "vhd", "vhdl"] vunitPath
     let paths = srcPaths ++ testPaths
-    catMaybes <$> mapM ( \ path ->
-        do
-            text <- readFile path
+    
+    catMaybes <$>
+      mapM 
+        ( \ path -> do
             let fileName = takeFileName path
-            return (tryExtractPSLFile text fileName path) )
+            text <- readFile path
+            return (
+              case runParser pPSL "" (T.pack text) of
+                Left  error -> Nothing
+                Right psl  -> Just (psl, fileName, path) ) )
         paths
-  where
-    tryExtractPSLFile :: String -> String -> String -> Maybe (PSLFile, String, String)
-    tryExtractPSLFile text file path = do
-      psl <- (parseMaybe pPSL . T.pack) text
-      return (psl, file, path)
 
 filterByUut :: String -> [(PSLFile, String, String)] -> [(PSLFile, String, String)]
 filterByUut "" vunits = vunits
