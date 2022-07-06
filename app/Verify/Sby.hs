@@ -89,8 +89,9 @@ getVunits srcPath vunitPath = do
   where
     tryExtractPSLFile :: String -> String -> String -> Maybe (PSLFile, String, String)
     tryExtractPSLFile text file path = do
-      psl <- (parseMaybe pPSL . T.pack) text
-      return (psl, file, path)
+      case runParser pPSL "" (T.pack text) of
+        Left  bundle -> error (errorBundlePretty bundle)
+        Right psl    -> return (psl, file, path)
 
 filterByUut :: String -> [(PSLFile, String, String)] -> [(PSLFile, String, String)]
 filterByUut "" vunits = vunits
