@@ -67,11 +67,9 @@ getErrorLogs = mapMaybe errorFilter . parseLogs
 
 parseLogs :: Text -> [SbyLog]
 parseLogs logTxt =
-    case logs of
-        Nothing -> error "Error parsing symbiyosys log"
-        Just parsedLogs -> parsedLogs
-  where
-    logs = parseMaybe pSbyLog logTxt
+    case runParser pSbyLog "" logTxt of
+        Left  bundle -> error (errorBundlePretty bundle)
+        Right l      -> l
 
 pSbyLog :: TextParser [SbyLog]
 pSbyLog =
