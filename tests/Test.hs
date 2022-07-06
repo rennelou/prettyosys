@@ -5,6 +5,7 @@ import Test.Tasty.HUnit
 import qualified Data.Text as T
 import Text.Megaparsec hiding (State)
 import Parsers.SbyLog.SbyLog
+import Parsers.PSL
 import Data.Void
 
 main :: IO ()
@@ -14,7 +15,7 @@ tests :: TestTree
 tests = testGroup "Tests" [unitTests]
 
 unitTests :: TestTree
-unitTests = testGroup "Unit Tests" [sbyLogTests]
+unitTests = testGroup "Unit Tests" [sbyLogTests, pslLogTests]
 
 sbyLogTests :: TestTree
 sbyLogTests = testGroup "Sby Log Parser Tests" [coverSbyLogTest, proveSbyLogTest]
@@ -81,5 +82,88 @@ proveSbyLogTest =
 assertParseSbyLog :: String -> IO ()
 assertParseSbyLog log = 
   case runParser pSbyLog "" . T.pack $ log of
+    Left error -> ioError (userError $ errorBundlePretty error)
+    Right result -> return ()
+
+pslLogTests :: TestTree
+pslLogTests = testGroup "PSL Parser Tests" [pslTest]
+
+pslTest :: TestTree
+pslTest =
+  testCase "PSL Parse"
+  $ assertParsePSL
+  $    "vunit linked_list_vu(linked_list(linked_list_rtl))\n"
+    ++ "{\n"
+    ++ "default clock is rising_edge(clk);\n"
+    ++ "\n"
+    ++ "assume rst = '1';\n"
+    ++ "\n"
+    ++ "attribute anyconst : boolean;\n"
+    ++ "\n"
+    ++ "signal any_value : std_logic_vector(CONTENT_SIZE - 1 downto 0);\n"
+    ++ "attribute anyconst of any_value : signal is true;\n"
+    ++ "assume any_value /= std_logic_vector(to_unsigned(0, CONTENT_SIZE));\n"
+    ++ "\n"
+    ++ "signal any_address : std_logic_vector(address_bits - 1 downto 0);\n"
+    ++  "attribute anyconst of any_address : signal is true;\n"
+    ++  "assume any_address /= std_logic_vector(to_unsigned(0, address_bits));\n"
+    ++  "\n"
+    ++  "HAPPY_SHORTER_PATH : cover {\n"
+    ++  "rst = '0' and done = '1' and start = '1' and opcode = append_command and new_value = any_value and new_node_address = any_address;\n"
+    ++  "rst = '0' [+];\n"
+    ++  "done = '1'\n"
+    ++  "};\n"
+    ++  "\n"
+    ++  "------------------ DONE_START PROTOCOL ASSERTIONS ------------------------\n"
+    ++  "IDLE_DONE_A : assert always (state_reg = idle -> done = '1') abort rst;\n"
+    ++  "IDLE_DONE_B : assert always (done = '1' -> state_reg = idle) abort rst;\n"
+    ++  "\n"
+    ++  "IDLE_TO_OTHERS_STATES : assert always (\n"
+    ++  "done = '1' and start = '1' and opcode < nop -> next(not stable(state_reg))\n"
+    ++  ") abort rst;\n"
+    ++  "\n"
+    ++  "IDLE_HOLDS : assert always (\n"
+    ++  "done = '1' and (start = '0' or opcode >= nop) -> next(stable(state_reg))\n"
+    ++  ") abort rst;\n"
+    ++  "--------------------------------------------------------------------------\n"
+    ++  "\n"
+    ++  "FETCH_NEW_NODE_ADDRESS : assert always (\n"
+    ++  "done = '1' and start = '1' -> next new_node_address_reg = prev(new_node_address)\n"
+    ++  ") abort rst;\n"
+    ++  "\n"
+    ++  "FETCH_NEW_VALUE : assert always (\n"
+    ++  "done = '1' and start = '1' -> next new_value_reg = prev(new_value)\n"
+    ++  ") abort rst;\n"
+    ++  "\n"
+    ++  "------------------- APPEND ASSERTIONS -------------------------------------\n"
+    ++  "SENDING_APPEND_START_STATE_APPEND_START_A : assert always (\n"
+    ++  "state_reg = sending_append_start -> append_start_reg = '1'\n"
+    ++  ") abort rst;\n"
+    ++  "\n"
+    ++  "SENDING_APPEND_START_STATE_APPEND_START_B : assert always (\n"
+    ++  "append_start_reg = '1' -> state_reg = sending_append_start\n"
+    ++  ") abort rst;\n"
+    ++  "\n"
+    ++  "SENDING_APPEND_START_TO_APPENDING : assert always (\n"
+    ++  "append_start_reg = '1' and append_done_i = '1' -> next state_reg = appending\n"
+    ++  ") abort rst;\n"
+    ++  "\n"
+    ++  "APPENDING_TO_UPDATE_HEAD : assert always (\n"
+    ++  "state_reg = appending and append_done_i = '1' -> next state_reg = update_head\n"
+    ++  ") abort rst;\n"
+    ++  "\n"
+    ++  "APPENDING_STATE_NEW_HEAD_ADDRESS : assert always (\n"
+    ++  "state_reg = appending -> append_new_head_address_i = new_node_address_reg\n"
+    ++  ") abort rst;\n"
+    ++  "---------------------------------------------------------------------------\n"
+    ++  "\n"
+    ++  "ASSERT_UPDATE_HEAD : assert always (\n"
+    ++  "state_reg = update_head -> head_address_reg = prev(append_new_head_address_i)\n"
+    ++  ") abort rst;\n"
+    ++  "}\n"
+
+assertParsePSL :: String -> IO ()
+assertParsePSL psl = 
+  case runParser pPSL "" . T.pack $ psl of
     Left error -> ioError (userError $ errorBundlePretty error)
     Right result -> return ()

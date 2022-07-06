@@ -39,7 +39,6 @@ pPSL = do
         architecture <- T.unpack <$> between (pCharsc '(') (pCharsc ')') pWord
         void (pCharsc ')')
         return (entity, architecture)
-    _ <- pBlock '{' '}' pBlockBody
     return (PSLFile vunitType unitName hdl)
 
 pVunitType :: TextParser VunitType
@@ -47,24 +46,3 @@ pVunitType = choice
     [ VUnit <$ pKeyword "vunit"
     , VProp <$ pKeyword "vprop"
     , VMode <$ pKeyword "vmode" ]
-
-pBlockBody :: TextParser ()
-pBlockBody =
-    pVunitItens
-
-pVunitItens :: TextParser ()
-pVunitItens =
-    void (M.some pVunitItem)
-
-pVunitItem :: TextParser ()
-pVunitItem =
-    void (pBlock '{' '}' pVunitItens)
-    <|> void (pBlock '(' ')' pVunitItens)
-    <|> void (pBlock '[' ']' pVunitItens)
-    <|> void pAnyPhrase
-
-pAnyPhrase :: TextParser [String]
-pAnyPhrase = lexeme (M.some pAnyWord)
-
-pAnyWord :: TextParser String
-pAnyWord = lexeme (M.some symbolChar)
