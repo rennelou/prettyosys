@@ -126,10 +126,9 @@ pCoverpointUnreachd = do
   _ <- pKeyword "Unreached cover statement at"
   CoverpointUnreachd <$> pProperty
 
--- INSERIR PATH
 pCoverpointVCD :: String -> String -> TextParser CoverLog
 pCoverpointVCD workdir path = do
-  CoverpointVCD <$> pWritingVCD
+  CoverpointVCD <$> pWritingVCD workdir path
 
 pCoverPointFail :: TextParser CoverLog
 pCoverPointFail = do
@@ -171,10 +170,9 @@ pAssertionFail = do
   (entity, property) <- pAssertionFailed
   return (AssertionFail entity property)
 
---INSERIR PATH
 pAssertionVCD :: String -> String -> TextParser AssertionLog
 pAssertionVCD workdir path = do
-  AssertionVCD <$> pWritingVCD
+  AssertionVCD <$> pWritingVCD workdir path
 
 
 
@@ -205,10 +203,11 @@ pAssertionFailed = do
     property <- pProperty
     return (entity, property)
 
-pWritingVCD :: TextParser String
-pWritingVCD = do
+pWritingVCD :: String -> String -> TextParser String
+pWritingVCD workdir path = do
     _ <- pKeyword "Writing trace to VCD file:"
-    T.unpack <$> pPath
+    vcdPath <- T.unpack <$> pPath
+    return (workdir </> path </> vcdPath)
 
 pStatus :: TextParser String
 pStatus = do
