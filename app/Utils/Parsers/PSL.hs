@@ -32,10 +32,10 @@ getTopLevel :: PSL -> String
 getTopLevel psl = fst $ hdl psl
 
 parsePsl :: T.Text -> Maybe PSL
-parsePsl s = 
+parsePsl s =
   case runParser pPSL "" s of
-    Left  error -> Nothing
-    Right psl  -> Just psl
+    Left  err -> Nothing
+    Right psl -> Just psl
 
 pPSL :: TextParser PSL
 pPSL = do

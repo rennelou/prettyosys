@@ -11,7 +11,9 @@ module Utils.Parsers.TextParser (
     pPath,
     pProcess,
     pHour,
-    pBlock
+    pBlock,
+    pLine,
+    pAnything
 ) where
 
 import Control.Monad
@@ -33,7 +35,7 @@ symbol :: Text -> TextParser Text
 symbol = L.symbol sc
 
 sc :: TextParser ()
-sc = L.space 
+sc = L.space
         (void $ some (char ' ' <|> char '\t' <|> char '\r' <|> char '\n'))
         (L.skipLineComment "--")
         empty
@@ -67,7 +69,7 @@ pHour = do
     hour <- integer
     _ <- char ':'
     minute <- integer
-    _ <- char ':' 
+    _ <- char ':'
     seconds <- integer
     return (hour, minute, seconds)
 
@@ -77,3 +79,9 @@ pBlock init end p = do
     r <- p
     void (pCharsc end)
     return r
+
+pLine :: TextParser String
+pLine = pAnything <* char '\n'
+
+pAnything :: TextParser String
+pAnything = M.many (satisfy (/= '\n'))

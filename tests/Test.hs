@@ -124,7 +124,7 @@ pslTest =
     ++  "done = '1' and (start = '0' or opcode >= nop) -> next(stable(state_reg))\n"
     ++  ") abort rst;\n"
     ++  "--------------------------------------------------------------------------\n"
-    ++  "}\n"
+    ++  "}"
 
 assertParser :: TextParser a -> T.Text -> IO ()
 assertParser parserc s =

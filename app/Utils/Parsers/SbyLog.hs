@@ -216,9 +216,3 @@ pStatus = do
 
 pAnyLine :: TextParser SbyLog
 pAnyLine = AnyLine <$ lexeme pLine
-
-pLine :: TextParser String
-pLine = pAnything <* char '\n'
-
-pAnything :: TextParser String
-pAnything = M.many (satisfy (/= '\n'))
