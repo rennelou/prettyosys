@@ -20,6 +20,12 @@ data SbyConfigFile = Sby {
   depht    :: Int
 }
 
+data PSLFile = PSLFile {
+  getPsl      :: PSL,
+  getFilename :: String,
+  getPath     :: String
+}
+
 instance Show SbyConfigFile where
   show Sby {topLevel=topLevel, files=files, paths=paths, depht=depht} =
       sbyTasksConfig ++
@@ -55,25 +61,26 @@ instance Show SbyConfigFile where
 createSymbiosysConfigFiles :: String -> Int -> String -> String -> IO [SbyConfigFile]
 createSymbiosysConfigFiles uut depht srcPath vunitPath = do  
   srcPaths <- getFiles ["vhd", "vhdl"] srcPath
+  
   let srcFileNames = getFileNames srcPaths
    
   vunits <- getPropertySpecificationFiles srcPath vunitPath
+
   let filteredVunits = filterByUut uut vunits
-  let vunitFile = getVunitFiles vunits
-  let vunitPaths = getVunitPaths vunits
+  let vunitFile = map getFilename vunits
+  let vunitPaths = map getPath vunits
 
   return (
     map
-      (\ (psl, file, path) ->
+      (\ pslFile ->
         Sby
-          (getTopLevel psl)
+          (getTopLevel (getPsl pslFile))
           (srcFileNames ++ vunitFile)
           (srcPaths ++ vunitPaths)
           depht )
       filteredVunits )
 
---[(PSLFile, String, String)] tem que virar data
-getPropertySpecificationFiles :: String -> String -> IO [(PSLFile, String, String)]
+getPropertySpecificationFiles :: String -> String -> IO [PSLFile]
 getPropertySpecificationFiles srcPath vunitPath = do
   srcPaths <- getFiles ["psl", "vhd", "vhdl"] srcPath
   testPaths <- getFiles ["psl", "vhd", "vhdl"] vunitPath
@@ -84,19 +91,12 @@ getPropertySpecificationFiles srcPath vunitPath = do
       ( \ path -> do
         let fileName = takeFileName path
         text <- readFile path
-        return (
-          -- NÂO ERA PRA TA AQUI
-          case runParser pPSL "" (T.pack text) of
-            Left  error -> Nothing
-            Right psl  -> Just (psl, fileName, path) ) )
+        let maybePslFile = parsePsl $ T.pack path
+        return (case maybePslFile of
+          Just pslFile -> Just (PSLFile {getPsl=pslFile, getFilename =fileName, getPath=path})
+          Nothing      -> Nothing ) )
       paths
 
-filterByUut :: String -> [(PSLFile, String, String)] -> [(PSLFile, String, String)]
+filterByUut :: String -> [PSLFile] -> [PSLFile]
 filterByUut "" vunits = vunits
-filterByUut uut vunits = filter (\ (psl, file, path) -> getTopLevel psl == uut) vunits
-
-getVunitFiles :: [(PSLFile, String, String)] -> [String]
-getVunitFiles = map (\ (_, file, path) -> file)
-
-getVunitPaths :: [(PSLFile, String, String)] -> [String]
-getVunitPaths = map (\ (_, file, path) -> path)
+filterByUut uut vunits = filter (\ pslFile -> getTopLevel (getPsl pslFile) == uut) vunits
