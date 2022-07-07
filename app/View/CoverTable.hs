@@ -2,7 +2,7 @@ module View.CoverTable (
     createCoverTable
 ) where
 
-import Verify.CoverPoint
+import Verify.Types.CoverPoint
 import View.Utils
 import Text.Layout.Table
 import Text.Layout.Table.Cell.Formatted

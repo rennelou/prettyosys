@@ -1,12 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Parsers.SbyLog.SbyLog (
-    getCoverLogs,
-    getAssertionLogs,
-    getErrorLogs,
+    parseLogs,
     pSbyLog,
     pAssertion,
     SbyLog(..),
+    LogLine(..),
     CoverLog(..),
     AssertionLog(..),
     VerifyType(..)
@@ -50,29 +49,6 @@ data AssertionLog =
 data VerifyType = 
     Basecase
   | Induction deriving (Eq, Show)
-
-getCoverLogs :: FilePath -> Text -> [CoverLog]
-getCoverLogs currentDirectory = mapMaybe getCover . parseLogs
-    
-getCover :: SbyLog -> Maybe CoverLog
-getCover (SbyLogLine (CoverLine cover)) = Just cover
-getCover _ = Nothing
-
-
-getAssertionLogs :: FilePath -> Text -> [(VerifyType, AssertionLog)]
-getAssertionLogs currentDirectory = mapMaybe getAssertion . parseLogs
-
-getAssertion :: SbyLog -> Maybe (VerifyType, AssertionLog)
-getAssertion (SbyLogLine (AssertionLine verifyType assertion)) = Just (verifyType, assertion)
-getAssertion _ = Nothing
-
-
-getErrorLogs :: Text -> [String]
-getErrorLogs = mapMaybe errorFilter . parseLogs
-
-errorFilter :: SbyLog -> Maybe String
-errorFilter (Error error) = Just error
-errorFilter _ = Nothing
 
 parseLogs :: Text -> [SbyLog]
 parseLogs logTxt =

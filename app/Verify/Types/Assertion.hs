@@ -2,7 +2,8 @@
 {-# HLINT ignore "Use tuple-section" #-}
 {-# HLINT ignore "Redundant bracket" #-}
 {-# HLINT ignore "Use lambda-case" #-}
-module Verify.Assertion (
+
+module Verify.Types.Assertion (
     Assertion(..),
     getCoverAssertion,
     getBasecaseAssertion,
@@ -17,6 +18,7 @@ import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import qualified Data.Text.IO as T
 import Data.Maybe
+import RTL.RTL (RTLArgs(workdir))
 
 data Assertion = Assertion {
     _ATpassed           :: Bool,
@@ -25,8 +27,8 @@ data Assertion = Assertion {
     _ATtrace            :: Maybe String
 } deriving (Show)
 
-getCoverAssertion :: [CoverLog] -> [(String, Assertion)]
-getCoverAssertion = insertTag "Cover" . mapCoverToAssertion
+getCoverAssertion :: FilePath -> T.Text -> [(String, Assertion)]
+getCoverAssertion workdir logs = insertTag "Cover" . mapCoverToAssertion $ (getCoverLogs workdir logs)
 
 mapCoverToAssertion :: [CoverLog] -> [Assertion]
 mapCoverToAssertion =
@@ -38,11 +40,13 @@ mapCoverToAssertion =
 
 
 
-getBasecaseAssertion :: [(VerifyType, AssertionLog)] -> [(String, Assertion)]
-getBasecaseAssertion = insertTag (show Basecase) . toAssertionSingleton. mapAssertionLogsToAssertion Basecase
+getBasecaseAssertion :: FilePath -> T.Text -> [(String, Assertion)]
+getBasecaseAssertion workdir logs =
+  insertTag (show Basecase) . toAssertionSingleton. mapAssertionLogsToAssertion Basecase $ (getAssertionLogs workdir logs)
 
-getInductionAssertion :: [(VerifyType, AssertionLog)] -> [(String, Assertion)]
-getInductionAssertion = insertTag (show Induction) . toAssertionSingleton . mapAssertionLogsToAssertion Induction
+getInductionAssertion :: FilePath -> T.Text -> [(String, Assertion)]
+getInductionAssertion workdir logs =
+  insertTag (show Induction) . toAssertionSingleton . mapAssertionLogsToAssertion Induction $ (getAssertionLogs workdir logs)
 
 
 
@@ -82,3 +86,19 @@ toAssertionSingleton a = [a]
 statusToBool :: String -> Bool
 statusToBool "passed" = True
 statusToBool _ = False
+
+
+
+getCoverLogs :: FilePath -> T.Text -> [CoverLog]
+getCoverLogs currentDirectory = mapMaybe getCover . parseLogs
+    
+getCover :: SbyLog -> Maybe CoverLog
+getCover (SbyLogLine (CoverLine cover)) = Just cover
+getCover _ = Nothing
+
+getAssertionLogs :: FilePath -> T.Text -> [(VerifyType, AssertionLog)]
+getAssertionLogs currentDirectory = mapMaybe getAssertion . parseLogs
+
+getAssertion :: SbyLog -> Maybe (VerifyType, AssertionLog)
+getAssertion (SbyLogLine (AssertionLine verifyType assertion)) = Just (verifyType, assertion)
+getAssertion _ = Nothing

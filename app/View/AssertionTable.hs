@@ -2,7 +2,7 @@ module View.AssertionTable (
     createAssertionTable
 ) where
 
-import Verify.Assertion
+import Verify.Types.Assertion
 import View.Utils
 import Text.Layout.Table
 import Text.Layout.Table.Cell.Formatted

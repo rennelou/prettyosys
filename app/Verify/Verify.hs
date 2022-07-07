@@ -7,9 +7,9 @@ module Verify.Verify (
 
 import Verify.Commands as Commands
 import Verify.Sby
-import Verify.CoverPoint
-import Verify.Assertion
-import Verify.Error
+import Verify.Types.CoverPoint
+import Verify.Types.Assertion
+import Verify.Types.Error
 
 import Utils.FileExtensionSearch
 
@@ -77,15 +77,15 @@ verify args sby = do
 
       putStrLn "\n\t\t\tCover Points\n"
 
-      putStrLn $ createCoverTable $ getCoverPoints (getCoverLogs workdir log)
+      putStrLn $ createCoverTable $ getCoverPoints workdir log
 
       putStrLn "\n\t\t\tAssertions\n"
       putStrLn $ createAssertionTable
-          (  getCoverAssertion     (getCoverLogs     workdir log)
-          ++ getBasecaseAssertion  (getAssertionLogs workdir log)
-          ++ getInductionAssertion (getAssertionLogs workdir log) )
+          (  getCoverAssertion     workdir log
+          ++ getBasecaseAssertion  workdir log
+          ++ getInductionAssertion workdir log )
 
-      putStrLn $ getError out
+      putStrLn $ getError log
       putStrLn "\n"
 
 readCommand :: String -> IO BL.ByteString

@@ -1,4 +1,4 @@
-module Verify.CoverPoint (
+module Verify.Types.CoverPoint (
     CoverPoint(..),
     getCoverPoints
 ) where
@@ -12,6 +12,7 @@ import qualified Data.Text.Encoding as T
 import qualified Data.Text.IO as T
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Lazy as BL
+import Data.Maybe
 
 data CoverPoint = CoverPoint {
     _CPname     :: String,
@@ -25,8 +26,8 @@ data CoverGroupState = CoverGroupState {
     coverPoints :: [CoverPoint]
 }
 
-getCoverPoints :: [CoverLog] -> [CoverPoint]
-getCoverPoints = coverPoints . foldl nextState (CoverGroupState [] [])
+getCoverPoints :: FilePath -> T.Text -> [CoverPoint]
+getCoverPoints workdir logs = coverPoints $ foldl nextState (CoverGroupState [] []) (getCoverLogs workdir logs)
 
 nextState :: CoverGroupState -> CoverLog -> CoverGroupState
 nextState CoverGroupState {buffer=buffer,coverPoints=coverPoints}  reached@(CoverpointReached _ _) =
@@ -44,3 +45,10 @@ createReachedCoverPoint _ _ = error "error creating reached cover point"
 createUnreachedCoverPoint :: CoverLog -> CoverPoint
 createUnreachedCoverPoint (CoverpointUnreachd name) = CoverPoint name False Nothing Nothing
 createUnreachedCoverPoint _ = error "error creating unreached coverPoint"
+
+getCoverLogs :: FilePath -> T.Text -> [CoverLog]
+getCoverLogs currentDirectory = mapMaybe getCover . parseLogs
+    
+getCover :: SbyLog -> Maybe CoverLog
+getCover (SbyLogLine (CoverLine cover)) = Just cover
+getCover _ = Nothing
