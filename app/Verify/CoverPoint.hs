@@ -25,12 +25,8 @@ data CoverGroupState = CoverGroupState {
     coverPoints :: [CoverPoint]
 }
 
-getCoverPoints :: FilePath -> BL.ByteString -> [CoverPoint]
-getCoverPoints workdir =
-    mapToCoverPoints . getCoverLogs workdir . T.decodeUtf8 . B.concat . BL.toChunks
-
-mapToCoverPoints :: [CoverLog] -> [CoverPoint]
-mapToCoverPoints  = coverPoints . foldl nextState (CoverGroupState [] [])
+getCoverPoints :: [CoverLog] -> [CoverPoint]
+getCoverPoints = coverPoints . foldl nextState (CoverGroupState [] [])
 
 nextState :: CoverGroupState -> CoverLog -> CoverGroupState
 nextState CoverGroupState {buffer=buffer,coverPoints=coverPoints}  reached@(CoverpointReached _ _) =

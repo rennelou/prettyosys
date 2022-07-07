@@ -15,12 +15,17 @@ import Utils.FileExtensionSearch
 
 import View.CoverTable
 import View.AssertionTable
+import qualified Data.Text as T
+import qualified Data.Text.Encoding as T
+import qualified Data.Text.IO as T
+import qualified Data.ByteString as B
 import qualified Data.ByteString.Lazy as BL
 
 import System.IO
 import System.Directory
 import System.Process.Typed
 import Control.Monad
+import Parsers.SbyLog.SbyLog
 
 data VerifyArgs = VerifyArgs {
         getMode :: Mode,
@@ -33,12 +38,12 @@ data VerifyArgs = VerifyArgs {
 
 verifyAll :: VerifyArgs -> IO ()
 verifyAll args = do
-    
+
     sbys <- getSbys (getTopLevel args) (getDepht args) "src" "verification_units"
 
     createDirectoryIfMissing True (getWorkDir args)
     setCurrentDirectory (getWorkDir args)
-    
+
     verifications <-
         mapM
             (\ sby -> do
@@ -67,15 +72,18 @@ verify args sby = do
   where
     prettyPrint :: BL.ByteString -> IO ()
     prettyPrint out = do
+      let workdir = getWorkDir args
+      let log = (T.decodeUtf8 . B.concat . BL.toChunks) out
+
       putStrLn "\n\t\t\tCover Points\n"
 
-      putStrLn $ createCoverTable $ getCoverPoints (getWorkDir args) out
+      putStrLn $ createCoverTable $ getCoverPoints (getCoverLogs workdir log)
 
       putStrLn "\n\t\t\tAssertions\n"
       putStrLn $ createAssertionTable
-          (  getCoverAssertion (getWorkDir args) out
-          ++ getBasecaseAssertion (getWorkDir args) out
-          ++ getInductionAssertion (getWorkDir args) out )
+          (  getCoverAssertion     (getCoverLogs     workdir log)
+          ++ getBasecaseAssertion  (getAssertionLogs workdir log)
+          ++ getInductionAssertion (getAssertionLogs workdir log) )
 
       putStrLn $ getError out
       putStrLn "\n"

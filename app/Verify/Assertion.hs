@@ -1,6 +1,7 @@
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# HLINT ignore "Use tuple-section" #-}
 {-# HLINT ignore "Redundant bracket" #-}
+{-# HLINT ignore "Use lambda-case" #-}
 module Verify.Assertion (
     Assertion(..),
     getCoverAssertion,
@@ -15,8 +16,7 @@ import Text.Megaparsec hiding (State)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import qualified Data.Text.IO as T
-import qualified Data.ByteString as B
-import qualified Data.ByteString.Lazy as BL
+import Data.Maybe
 
 data Assertion = Assertion {
     _ATpassed           :: Bool,
@@ -25,42 +25,42 @@ data Assertion = Assertion {
     _ATtrace            :: Maybe String
 } deriving (Show)
 
-getCoverAssertion :: FilePath -> BL.ByteString -> [(String, Assertion)]
-getCoverAssertion workdir =
-    insertTag "Cover" . mapCoverToAssertion . getCoverLogs workdir . T.decodeUtf8 . B.concat . BL.toChunks
+getCoverAssertion :: [CoverLog] -> [(String, Assertion)]
+getCoverAssertion = insertTag "Cover" . mapCoverToAssertion
 
 mapCoverToAssertion :: [CoverLog] -> [Assertion]
-mapCoverToAssertion = map toAssertion . getValidCoverEvents
-  where
-      toAssertion :: CoverLog -> Assertion
-      toAssertion (CoverPointFail entity name step) =
-        Assertion False step (Just name) Nothing
+mapCoverToAssertion =
+  mapMaybe 
+    (\ cover ->
+      case cover of
+        CoverPointFail entity name step -> Just (Assertion False step (Just name) Nothing)
+        _                               -> Nothing )
 
-      toAssertion _ = error "Error converting Cover to Assertion"
 
-      getValidCoverEvents :: [CoverLog] -> [CoverLog]
-      getValidCoverEvents = filter isCoverValid
-        where
-          isCoverValid :: CoverLog -> Bool
-          isCoverValid CoverPointFail {} = True
-          isCoverValid _ = False
 
-getBasecaseAssertion :: FilePath -> BL.ByteString -> [(String, Assertion)]
-getBasecaseAssertion workdir =
-    insertTag (show Basecase) . toAssertionSingleton. mapAssertionLogsToAssertion Basecase . getAssertionLogs workdir . T.decodeUtf8 . B.concat . BL.toChunks
+getBasecaseAssertion :: [(VerifyType, AssertionLog)] -> [(String, Assertion)]
+getBasecaseAssertion = insertTag (show Basecase) . toAssertionSingleton. mapAssertionLogsToAssertion Basecase
 
-getInductionAssertion :: FilePath -> BL.ByteString -> [(String, Assertion)]
-getInductionAssertion workdir =
-    insertTag (show Induction) . toAssertionSingleton . mapAssertionLogsToAssertion Induction . getAssertionLogs workdir . T.decodeUtf8 . B.concat . BL.toChunks
+getInductionAssertion :: [(VerifyType, AssertionLog)] -> [(String, Assertion)]
+getInductionAssertion = insertTag (show Induction) . toAssertionSingleton . mapAssertionLogsToAssertion Induction
+
+
 
 mapAssertionLogsToAssertion :: VerifyType -> [(VerifyType, AssertionLog)] -> Assertion
-mapAssertionLogsToAssertion verifyType = mapToAssertion . filterByVerifyType verifyType
+mapAssertionLogsToAssertion verifyType = 
+  transformLogsInAssertions . getLogIfVerifyTypeMatch verifyType
 
-mapToAssertion :: [AssertionLog] -> Assertion
-mapToAssertion = foldl nextState (Assertion False 0 Nothing Nothing)
+transformLogsInAssertions :: [AssertionLog] -> Assertion
+transformLogsInAssertions = foldl nextState (Assertion False 0 Nothing Nothing)
 
-filterByVerifyType :: VerifyType -> [(VerifyType, AssertionLog)] -> [AssertionLog]
-filterByVerifyType verifyType = map snd . (filter (\ (_verifyType, _) -> _verifyType == verifyType))
+getLogIfVerifyTypeMatch :: VerifyType -> [(VerifyType, AssertionLog)] -> [AssertionLog]
+getLogIfVerifyTypeMatch verifyType = 
+  mapMaybe
+    (\ (_verifyType, assertionLog) ->
+      if _verifyType == verifyType then
+        Just assertionLog
+      else
+        Nothing )
 
 nextState :: Assertion -> AssertionLog -> Assertion
 nextState assertion@(Assertion _ step name trace) (AssertionStatus passed) =
