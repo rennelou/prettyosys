@@ -19,6 +19,7 @@ import qualified Data.Text.Encoding as T
 import qualified Data.Text.IO as T
 import Data.Maybe
 import RTL.RTL (RTLArgs(workdir))
+import Verify.Types.Utils
 
 data Assertion = Assertion {
     _ATpassed           :: Bool,
@@ -42,20 +43,18 @@ mapCoverToAssertion =
 
 getBasecaseAssertion :: FilePath -> T.Text -> [(String, Assertion)]
 getBasecaseAssertion workdir logs =
-  insertTag (show Basecase) . toAssertionSingleton. mapAssertionLogsToAssertion Basecase $ (getAssertionLogs workdir logs)
+  insertTag (show Basecase) . assertionToSingletonAssertion. mapAssertionLogsToAssertion Basecase 
+  $ (getAssertionLogs workdir logs)
 
 getInductionAssertion :: FilePath -> T.Text -> [(String, Assertion)]
 getInductionAssertion workdir logs =
-  insertTag (show Induction) . toAssertionSingleton . mapAssertionLogsToAssertion Induction $ (getAssertionLogs workdir logs)
+  insertTag (show Induction) . assertionToSingletonAssertion . mapAssertionLogsToAssertion Induction 
+  $ (getAssertionLogs workdir logs)
 
 
 
 mapAssertionLogsToAssertion :: VerifyType -> [(VerifyType, AssertionLog)] -> Assertion
-mapAssertionLogsToAssertion verifyType = 
-  transformLogsInAssertions . getLogIfVerifyTypeMatch verifyType
-
-transformLogsInAssertions :: [AssertionLog] -> Assertion
-transformLogsInAssertions = foldl nextState (Assertion False 0 Nothing Nothing)
+mapAssertionLogsToAssertion verifyType = transformLogsInAssertions . getLogIfVerifyTypeMatch verifyType
 
 getLogIfVerifyTypeMatch :: VerifyType -> [(VerifyType, AssertionLog)] -> [AssertionLog]
 getLogIfVerifyTypeMatch verifyType = 
@@ -65,6 +64,9 @@ getLogIfVerifyTypeMatch verifyType =
         Just assertionLog
       else
         Nothing )
+
+transformLogsInAssertions :: [AssertionLog] -> Assertion
+transformLogsInAssertions = foldl nextState (Assertion False 0 Nothing Nothing)
 
 nextState :: Assertion -> AssertionLog -> Assertion
 nextState assertion@(Assertion _ step name trace) (AssertionStatus passed) =
@@ -76,29 +78,15 @@ nextState assertion@(Assertion passed step _ trace) (AssertionFail _ name) =
 nextState assertion@(Assertion passed step name _) (AssertionVCD trace) =
       Assertion passed step name (Just trace)
 
+assertionToSingletonAssertion :: Assertion -> [Assertion]
+assertionToSingletonAssertion (Assertion False 0 Nothing Nothing) = []
+assertionToSingletonAssertion a = [a]
+
 insertTag :: String -> [Assertion] -> [(String, Assertion)]
 insertTag tag = map (\ a -> (tag, a))
 
-toAssertionSingleton :: Assertion -> [Assertion]
-toAssertionSingleton (Assertion False 0 Nothing Nothing) = []
-toAssertionSingleton a = [a]
+
 
 statusToBool :: String -> Bool
 statusToBool "passed" = True
 statusToBool _ = False
-
-
-
-getCoverLogs :: FilePath -> T.Text -> [CoverLog]
-getCoverLogs currentDirectory = mapMaybe getCover . parseLogs
-    
-getCover :: SbyLog -> Maybe CoverLog
-getCover (SbyLogLine (CoverLine cover)) = Just cover
-getCover _ = Nothing
-
-getAssertionLogs :: FilePath -> T.Text -> [(VerifyType, AssertionLog)]
-getAssertionLogs currentDirectory = mapMaybe getAssertion . parseLogs
-
-getAssertion :: SbyLog -> Maybe (VerifyType, AssertionLog)
-getAssertion (SbyLogLine (AssertionLine verifyType assertion)) = Just (verifyType, assertion)
-getAssertion _ = Nothing

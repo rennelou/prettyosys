@@ -24,7 +24,7 @@ sbyLogTests = testGroup "Sby Log Parser Tests" [coverSbyLogTest, proveSbyLogTest
 coverSbyLogTest :: TestTree
 coverSbyLogTest =
   testCase  "Cover Sby Log Parse"
-  $ assertParser pSbyLog . T.pack
+  $ assertParser (pSbyLog "") . T.pack
   $    "SBY 18:50:12 [ram_cover] Copy '/mnt/c/git/atg.mdadapter/src/mocks/memory_mock.vhd' to '/mnt/c/git/atg.mdadapter/verify_build/ram_cover/src/memory_mock.vhd'.\n"
     ++ "SBY 18:50:13 [ram_cover] engine_0: smtbmc\n"
     ++ "SBY 18:50:13 [ram_cover] base: starting process \"cd ram_cover/src; yosys -m ghdl -ql ../model/design.log ../model/design.ys\"\n"
@@ -51,7 +51,7 @@ coverSbyLogTest =
 proveSbyLogTest :: TestTree
 proveSbyLogTest =
   testCase "Prove Sby Log Parse"
-  $ assertParser pSbyLog . T.pack
+  $ assertParser (pSbyLog "") . T.pack
   $    "SBY 18:50:13 [ram_prove] Copy '/mnt/c/git/atg.mdadapter/src/mocks/memory_mock.vhd' to '/mnt/c/git/atg.mdadapter/verify_build/ram_prove/src/memory_mock.vhd'.\n"
     ++ "SBY 18:50:13 [ram_prove] engine_0: smtbmc\n"
     ++ "SBY 18:50:13 [ram_prove] base: starting process \"cd ram_prove/src; yosys -m ghdl -ql ../model/design.log ../model/design.ys\"\n"
@@ -83,7 +83,7 @@ proveSbyLogTest =
 assertionParseTest :: TestTree
 assertionParseTest =
   testCase "Assertion Line"
-  $  assertParser (pAssertion "") . T.pack 
+  $  assertParser (pAssertion "" "") . T.pack 
   $  "engine_0.basecase: ##   0:00:00  Checking assertions in step 0..\n"
 
 pslLogTests :: TestTree

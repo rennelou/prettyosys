@@ -6,6 +6,7 @@ module Verify.Types.CoverPoint (
 import System.Directory
 
 import Parsers.SbyLog.SbyLog
+import Verify.Types.Utils
 import Text.Megaparsec hiding (State)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
@@ -45,10 +46,3 @@ createReachedCoverPoint _ _ = error "error creating reached cover point"
 createUnreachedCoverPoint :: CoverLog -> CoverPoint
 createUnreachedCoverPoint (CoverpointUnreachd name) = CoverPoint name False Nothing Nothing
 createUnreachedCoverPoint _ = error "error creating unreached coverPoint"
-
-getCoverLogs :: FilePath -> T.Text -> [CoverLog]
-getCoverLogs currentDirectory = mapMaybe getCover . parseLogs
-    
-getCover :: SbyLog -> Maybe CoverLog
-getCover (SbyLogLine (CoverLine cover)) = Just cover
-getCover _ = Nothing

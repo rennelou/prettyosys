@@ -85,7 +85,7 @@ verify args sby = do
           ++ getBasecaseAssertion  workdir log
           ++ getInductionAssertion workdir log )
 
-      putStrLn $ getError log
+      putStrLn $ getError workdir log
       putStrLn "\n"
 
 readCommand :: String -> IO BL.ByteString

@@ -11,13 +11,7 @@ import qualified Data.Text.IO as T
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Lazy as BL
 import Data.Maybe
+import Verify.Types.Utils
 
-getError :: T.Text -> String
-getError logs = intercalate "\n" $ getErrorLogs logs
-
-getErrorLogs :: T.Text -> [String]
-getErrorLogs = mapMaybe errorFilter . parseLogs
-
-errorFilter :: SbyLog -> Maybe String
-errorFilter (Error error) = Just error
-errorFilter _ = Nothing
+getError :: FilePath -> T.Text -> String
+getError workdir logs = intercalate "\n" $ getErrorLogs workdir logs
