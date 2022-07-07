@@ -9,11 +9,11 @@ import System.Directory
 import qualified Data.Text as T
 
 import Verify.Commands
-import Verify.Sby
+import Verify.SbyConfigFile
 
 data VerifyArgs = VerifyArgs {
         getMode :: Mode,
-        getTopLevel :: String,
+        getUUT :: String,
         getBackupFlag :: Bool,
         getReplaceFlag :: Bool,
         getWorkDir :: String,
@@ -22,21 +22,22 @@ data VerifyArgs = VerifyArgs {
 
 runVerification :: VerifyArgs -> IO ()
 runVerification args = do
-    let toplevel = getTopLevel args
+    let uut = getUUT args
     let depht = getDepht args
     let workdir = getWorkDir args
     let replaceFlag = getReplaceFlag args
     let mode = getMode args
     let backupFlag = getBackupFlag args
 
-    sbyConfigFiles <- createSymbiosysConfigFiles toplevel depht "src" "verification_units"
+    sbyConfigFiles <- createSymbiosysConfigFiles uut depht "src" "verification_units"
 
     createDirectoryIfMissing True workdir
     setCurrentDirectory workdir
 
     mapM_
         (\ sbyConfigFile -> do
-            
+            let toplevel = topLevel sbyConfigFile
+
             removeOldDirectoriesWhen replaceFlag toplevel
             
             putStrLn $ "\n\t\t\t" ++ toplevel ++ " verification"
@@ -45,7 +46,7 @@ runVerification args = do
             lint sbyConfigFile
             
             putStrLn $ "\n" ++ " verifing " ++ toplevel ++ "...\n"
-            sbyLog <- verify mode backupFlag toplevel sbyConfigFile
+            sbyLog <- verify mode backupFlag sbyConfigFile
 
             prettyPrint workdir sbyLog
         )

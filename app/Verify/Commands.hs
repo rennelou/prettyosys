@@ -16,7 +16,7 @@ import qualified Data.ByteString.Lazy as BL
 import qualified Data.ByteString as B
 import qualified Data.Text.Encoding as T
 
-import Verify.Sby
+import Verify.SbyConfigFile
 import Utils.FileExtensionSearch
 import Verify.Types.CoverPoint
 import Verify.Types.Assertion
@@ -27,32 +27,32 @@ import Verify.View.AssertionTable
 
 data Mode = CoverProve | Cover | Prove deriving (Read, Show);
 
-lint :: SymbiosysConfigFile -> IO ()
+lint :: SbyConfigFile -> IO ()
 lint = callCommand . yosysLint
 
-yosysLint :: SymbiosysConfigFile -> String
-yosysLint sby =
+yosysLint :: SbyConfigFile -> String
+yosysLint sbyCongigFile =
   "yosys -m ghdl -qp " ++
   "'" ++
-  "ghdl --std=08 " ++ unwords (paths sby) ++
-  " -e "++ topLevel sby ++"; " ++
-  "prep -top " ++ topLevel sby ++ "; " ++
+  "ghdl --std=08 " ++ unwords (paths sbyCongigFile) ++
+  " -e "++ topLevel sbyCongigFile ++"; " ++
+  "prep -top " ++ topLevel sbyCongigFile ++ "; " ++
   "hierarchy -simcheck" ++
   "'"
 
 
-verify :: Mode -> Bool -> String -> SymbiosysConfigFile -> IO BL.ByteString
-verify mode backupFlag toplevel sbyCongigFile = 
+verify :: Mode -> Bool -> SbyConfigFile -> IO BL.ByteString
+verify mode backupFlag sbyCongigFile = 
   readCommand
-  $ symbiyosys mode backupFlag toplevel sbyCongigFile
+  $ symbiyosys mode backupFlag sbyCongigFile
 
-symbiyosys :: Mode -> Bool -> String -> SymbiosysConfigFile -> String
-symbiyosys mode backupFlag toplevel sbyConfigFile =
+symbiyosys :: Mode -> Bool -> SbyConfigFile -> String
+symbiyosys mode backupFlag sbyConfigFile =
   printf "echo \"%s\" | sby --yosys \"yosys -m ghdl\" %s %s --prefix %s"
     (show sbyConfigFile)
     (sbyMode mode)
     (sbyBackupFlag backupFlag)
-    toplevel
+    (topLevel sbyConfigFile)
 
 
 removeOldDirectoriesWhen :: Bool -> String -> IO ()

@@ -1,5 +1,5 @@
-module Verify.Sby (
-  SymbiosysConfigFile(..),
+module Verify.SbyConfigFile (
+  SbyConfigFile(..),
   createSymbiosysConfigFiles
 ) where
 
@@ -13,14 +13,14 @@ import Text.Megaparsec hiding (State)
 import Utils.Parsers.PSL
 import Utils.FileExtensionSearch
 
-data SymbiosysConfigFile = Sby {
+data SbyConfigFile = Sby {
   topLevel :: String,
   files    :: [String],
   paths    :: [String],
   depht    :: Int
 }
 
-instance Show SymbiosysConfigFile where
+instance Show SbyConfigFile where
   show Sby {topLevel=topLevel, files=files, paths=paths, depht=depht} =
       sbyTasksConfig ++
       sbyEngineConfig ++
@@ -52,7 +52,7 @@ instance Show SymbiosysConfigFile where
       sbyFilesConfig :: String
       sbyFilesConfig = printf "[files]\n%s" (intercalate "\n" paths)
 
-createSymbiosysConfigFiles :: String -> Int -> String -> String -> IO [SymbiosysConfigFile]
+createSymbiosysConfigFiles :: String -> Int -> String -> String -> IO [SbyConfigFile]
 createSymbiosysConfigFiles uut depht srcPath vunitPath = do  
   srcPaths <- getFiles ["vhd", "vhdl"] srcPath
   let srcFileNames = getFileNames srcPaths
