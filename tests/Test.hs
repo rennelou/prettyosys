@@ -5,9 +5,9 @@ import Test.Tasty.HUnit
 import qualified Data.Text as T
 import Text.Megaparsec hiding (State)
 
-import Parsers.TextParser
-import Parsers.SbyLog
-import Parsers.PSL
+import Utils.Parsers.TextParser
+import Utils.Parsers.SbyLog
+import Utils.Parsers.PSL
 import Data.Void
 
 main :: IO ()

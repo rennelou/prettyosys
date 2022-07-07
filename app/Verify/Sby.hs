@@ -3,15 +3,15 @@ module Verify.Sby (
     getSbys
 ) where
 
-import Parsers.PSL
-import Utils.FileExtensionSearch
-
 import Data.List
 import System.FilePath
 import qualified Data.Text as T
 import Text.Printf
 import Data.Maybe
 import Text.Megaparsec hiding (State)
+
+import Utils.Parsers.PSL
+import Utils.FileExtensionSearch
 
 data Sby = Sby {
     topLevel :: String,

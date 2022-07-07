@@ -4,12 +4,12 @@ module Utils.FileExtensionSearch (
     tryRemoveDirectory
 ) where
 
-import Parsers.PSL
-
 import System.Directory
 import System.FilePath
 import Data.Functor
 import Control.Monad
+
+import Utils.Parsers.PSL
 
 getFileNames :: [FilePath] -> [String]
 getFileNames = map takeFileName

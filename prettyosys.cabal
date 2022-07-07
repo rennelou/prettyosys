@@ -40,10 +40,10 @@ executable prettyosys
                    View.CoverTable,
                    View.AssertionTable,
                    View.Utils,
-                   Parsers.TextParser,
-                   Parsers.PSL,
-                   Parsers.SbyLog,
-                   Utils.FileExtensionSearch
+                   Utils.FileExtensionSearch,
+                   Utils.Parsers.TextParser,
+                   Utils.Parsers.PSL,
+                   Utils.Parsers.SbyLog
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -81,10 +81,10 @@ Test-Suite test
                    View.CoverTable,
                    View.AssertionTable,
                    View.Utils,
-                   Parsers.TextParser,
-                   Parsers.PSL,
-                   Parsers.SbyLog,
-                   Utils.FileExtensionSearch
+                   Utils.FileExtensionSearch,
+                   Utils.Parsers.TextParser,
+                   Utils.Parsers.PSL,
+                   Utils.Parsers.SbyLog
     
     build-depends: base,
                    tasty,

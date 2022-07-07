@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Parsers.SbyLog (
+module Utils.Parsers.SbyLog (
     parseLogs,
     pSbyLog,
     pAssertion,
@@ -22,7 +22,7 @@ import qualified Text.Megaparsec.Char.Lexer as L
 import qualified Text.Megaparsec as M
 
 import System.FilePath
-import Parsers.TextParser
+import Utils.Parsers.TextParser
 
 data SbyLog =
     SbyLogLine LineWithContent

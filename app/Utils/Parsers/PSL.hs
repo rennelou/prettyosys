@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Parsers.PSL (
+module Utils.Parsers.PSL (
     PSLFile(..),
     getTopLevel,
     VunitType(..),
@@ -16,7 +16,8 @@ import Text.Megaparsec.Char
 import qualified Data.Text as T
 import qualified Text.Megaparsec.Char.Lexer as L
 import qualified Text.Megaparsec as M
-import Parsers.TextParser
+
+import Utils.Parsers.TextParser
 
 data PSLFile = PSLFile {
     vunitType   :: VunitType,

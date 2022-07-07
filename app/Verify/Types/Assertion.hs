@@ -17,7 +17,7 @@ import qualified Data.Text.IO as T
 import Data.Maybe
 
 import System.Directory
-import Parsers.SbyLog
+import Utils.Parsers.SbyLog
 import Verify.Types.Utils
 
 data Assertion = Assertion {

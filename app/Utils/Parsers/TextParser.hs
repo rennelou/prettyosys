@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Parsers.TextParser (
+module Utils.Parsers.TextParser (
     TextParser,
     lexeme,
     symbol,

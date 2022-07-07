@@ -12,7 +12,7 @@ import qualified Data.ByteString.Lazy as BL
 import Data.Maybe
 
 import System.Directory
-import Parsers.SbyLog
+import Utils.Parsers.SbyLog
 import Verify.Types.Utils
 
 data CoverPoint = CoverPoint {
