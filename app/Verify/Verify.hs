@@ -25,7 +25,7 @@ import System.IO
 import System.Directory
 import System.Process.Typed
 import Control.Monad
-import Parsers.SbyLog.SbyLog
+import Parsers.SbyLog
 
 data VerifyArgs = VerifyArgs {
         getMode :: Mode,

@@ -42,8 +42,7 @@ executable prettyosys
                    View.Utils,
                    Parsers.TextParser,
                    Parsers.PSL,
-                   Parsers.SbyLog.SbyLog,
-                   Parsers.SbyLog.Utils,
+                   Parsers.SbyLog,
                    Utils.FileExtensionSearch
 
     -- LANGUAGE extensions used by modules in this package.
@@ -84,8 +83,7 @@ Test-Suite test
                    View.Utils,
                    Parsers.TextParser,
                    Parsers.PSL,
-                   Parsers.SbyLog.SbyLog,
-                   Parsers.SbyLog.Utils,
+                   Parsers.SbyLog,
                    Utils.FileExtensionSearch
     
     build-depends: base,

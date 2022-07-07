@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Parsers.SbyLog.SbyLog (
+module Parsers.SbyLog (
     parseLogs,
     pSbyLog,
     pAssertion,
@@ -11,8 +11,6 @@ module Parsers.SbyLog.SbyLog (
     VerifyType(..)
 ) where
 
-import System.FilePath
-import Parsers.SbyLog.Utils
 import Control.Monad
 import Data.Maybe
 import Data.Text (Text)
@@ -22,8 +20,9 @@ import Text.Megaparsec.Char
 import qualified Data.Text as T
 import qualified Text.Megaparsec.Char.Lexer as L
 import qualified Text.Megaparsec as M
+
+import System.FilePath
 import Parsers.TextParser
-import Verify.Sby (Sby)
 
 data SbyLog =
     SbyLogLine LineWithContent
@@ -184,8 +183,43 @@ pError = do
   _ <- pKeyword "ERROR:"
   Error <$> (pAnything <* char '\n')
 
+
+pEntity :: TextParser String
+pEntity = lexeme (M.some (alphaNumChar <|> char '_') )
+
+pProperty :: TextParser String
+pProperty = lexeme (M.some (alphaNumChar <|> char '_' <|> char '.' <|> char ':' <|> char '/') )
+
+pCheck :: String -> TextParser Integer
+pCheck checkType = do
+    _ <- pKeyword $ T.pack checkType
+    step <- integer
+    _ <- pKeyword ".."
+    return step
+
+pAssertionFailed :: TextParser (String, String)
+pAssertionFailed = do
+    _ <- pKeyword "Assert failed in"
+    entity <- pEntity
+    _ <- pCharsc ':'
+    property <- pProperty
+    return (entity, property)
+
+pWritingVCD :: TextParser String
+pWritingVCD = do
+    _ <- pKeyword "Writing trace to VCD file:"
+    T.unpack <$> pPath
+
+pStatus :: TextParser String
+pStatus = do
+    _ <- pKeyword "Status:"
+    T.unpack <$> pWord
+
 pAnyLine :: TextParser SbyLog
 pAnyLine = AnyLine <$ lexeme pLine
 
 pLine :: TextParser String
 pLine = pAnything <* char '\n'
+
+pAnything :: TextParser String
+pAnything = M.many (satisfy (/= '\n'))

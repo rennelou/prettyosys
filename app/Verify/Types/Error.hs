@@ -2,7 +2,7 @@ module Verify.Types.Error (
     getError
 ) where
 
-import Parsers.SbyLog.SbyLog
+import Parsers.SbyLog
 import Data.List
 import Text.Megaparsec hiding (State)
 import qualified Data.Text as T

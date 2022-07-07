@@ -4,8 +4,9 @@ import Test.Tasty.QuickCheck as QC
 import Test.Tasty.HUnit
 import qualified Data.Text as T
 import Text.Megaparsec hiding (State)
+
 import Parsers.TextParser
-import Parsers.SbyLog.SbyLog
+import Parsers.SbyLog
 import Parsers.PSL
 import Data.Void
 

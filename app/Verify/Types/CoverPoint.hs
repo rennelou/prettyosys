@@ -3,10 +3,6 @@ module Verify.Types.CoverPoint (
     getCoverPoints
 ) where
 
-import System.Directory
-
-import Parsers.SbyLog.SbyLog
-import Verify.Types.Utils
 import Text.Megaparsec hiding (State)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
@@ -14,6 +10,10 @@ import qualified Data.Text.IO as T
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Lazy as BL
 import Data.Maybe
+
+import System.Directory
+import Parsers.SbyLog
+import Verify.Types.Utils
 
 data CoverPoint = CoverPoint {
     _CPname     :: String,

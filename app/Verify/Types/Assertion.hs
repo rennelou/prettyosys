@@ -10,15 +10,14 @@ module Verify.Types.Assertion (
     getInductionAssertion
 ) where
 
-import System.Directory
-
-import Parsers.SbyLog.SbyLog
 import Text.Megaparsec hiding (State)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import qualified Data.Text.IO as T
 import Data.Maybe
-import RTL.RTL (RTLArgs(workdir))
+
+import System.Directory
+import Parsers.SbyLog
 import Verify.Types.Utils
 
 data Assertion = Assertion {

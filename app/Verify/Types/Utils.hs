@@ -9,7 +9,7 @@ module Verify.Types.Utils (
 import qualified Data.Text as T
 import Data.Maybe
 
-import Parsers.SbyLog.SbyLog
+import Parsers.SbyLog
 
 getCoverLogs :: FilePath -> T.Text -> [CoverLog]
 getCoverLogs workdir =
