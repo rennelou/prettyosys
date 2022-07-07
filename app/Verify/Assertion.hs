@@ -46,13 +46,13 @@ mapCoverToAssertion = map toAssertion . getValidCoverEvents
 
 getBasecaseAssertion :: FilePath -> BL.ByteString -> [(String, Assertion)]
 getBasecaseAssertion workdir =
-    insertTag "Basecase" . toAssertionSingleton. mapAssertionLogsToAssertion "basecase" . getAssertionLogs workdir . T.decodeUtf8 . B.concat . BL.toChunks
+    insertTag (show Basecase) . toAssertionSingleton. mapAssertionLogsToAssertion Basecase . getAssertionLogs workdir . T.decodeUtf8 . B.concat . BL.toChunks
 
 getInductionAssertion :: FilePath -> BL.ByteString -> [(String, Assertion)]
 getInductionAssertion workdir =
-    insertTag "Induction" . toAssertionSingleton . mapAssertionLogsToAssertion "induction" . getAssertionLogs workdir . T.decodeUtf8 . B.concat . BL.toChunks
+    insertTag (show Induction) . toAssertionSingleton . mapAssertionLogsToAssertion Induction . getAssertionLogs workdir . T.decodeUtf8 . B.concat . BL.toChunks
 
-mapAssertionLogsToAssertion :: String -> [AssertionLog] -> Assertion
+mapAssertionLogsToAssertion :: VerifyType -> [AssertionLog] -> Assertion
 mapAssertionLogsToAssertion verifyType = mapToAssertion nextState
     where
         nextState :: Assertion -> AssertionLog -> Assertion

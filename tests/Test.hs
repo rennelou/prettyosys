@@ -16,7 +16,7 @@ tests :: TestTree
 tests = testGroup "Tests" [unitTests]
 
 unitTests :: TestTree
-unitTests = testGroup "Unit Tests" [sbyLogTests, pslLogTests]
+unitTests = testGroup "Unit Tests" [sbyLogTests, pslLogTests, assertionParseTest]
 
 sbyLogTests :: TestTree
 sbyLogTests = testGroup "Sby Log Parser Tests" [coverSbyLogTest, proveSbyLogTest]
@@ -79,6 +79,12 @@ proveSbyLogTest =
     ++ "SBY 18:50:14 [ram_prove] summary: engine_0 (smtbmc) returned pass for basecase\n"
     ++ "SBY 18:50:14 [ram_prove] summary: successful proof by k-induction.\n"
     ++ "SBY 18:50:14 [ram_prove] DONE (PASS, rc=0)\n"
+
+assertionParseTest :: TestTree
+assertionParseTest =
+  testCase "Assertion Line"
+  $  assertParser (pAssertion "") . T.pack 
+  $  "engine_0.basecase: ##   0:00:00  Checking assertions in step 0..\n"
 
 pslLogTests :: TestTree
 pslLogTests = testGroup "PSL Parser Tests" [pslTest]

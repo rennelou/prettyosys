@@ -5,9 +5,11 @@ module Parsers.SbyLog.SbyLog (
     getAssertionLogs,
     getErrorLogs,
     pSbyLog,
+    pAssertion,
     SbyLog(..),
     CoverLog(..),
-    AssertionLog(..)
+    AssertionLog(..),
+    VerifyType(..)
 ) where
 
 import System.FilePath
@@ -40,10 +42,14 @@ data CoverLog =
     | CoverPointFail String String Integer deriving (Show)
 
 data AssertionLog =
-      AssertionStatus String String
-    | AssertionStep String Integer
-    | AssertionFail String String String
-    | AssertionVCD String String deriving (Show)
+      AssertionStatus VerifyType String
+    | AssertionStep VerifyType Integer
+    | AssertionFail VerifyType String String
+    | AssertionVCD VerifyType String deriving (Show)
+
+data VerifyType = 
+    Basecase
+  | Induction deriving (Eq, Show)
 
 getCoverLogs :: FilePath -> Text -> [CoverLog]
 getCoverLogs currentDirectory = mapMaybe getCover . parseLogs
@@ -91,8 +97,8 @@ pSbyLogLine = do
 pLogLine :: String -> TextParser LogLine
 pLogLine path = do 
     choice [
-        CoverLine     <$> pCover path,
-        AssertionLine <$> pAssertion path ]
+        try (CoverLine     <$> pCover path),
+             AssertionLine <$> pAssertion path ]
 
 pCover :: String -> TextParser CoverLog
 pCover path = do
@@ -155,30 +161,34 @@ pAssertion path = do
             pAssertionVCD verifyType path
         ] )
 
-pEngineAssertion :: TextParser String
+pEngineAssertion :: TextParser VerifyType
 pEngineAssertion = do
-    _ <- pKeyword "engine_0."
-    verifyType <- T.unpack <$> pWord
+    _ <- string "engine_0."
+    verifyType <- ( do
+        choice [
+          Basecase  <$ string "basecase",
+          Induction <$ string "induction" ]
+        )
     _ <- pKeyword ": ##"
     _ <- pHour
     return verifyType
 
-pAssertionStatus :: String -> TextParser AssertionLog
+pAssertionStatus :: VerifyType -> TextParser AssertionLog
 pAssertionStatus verifyType = do
     AssertionStatus verifyType <$> pStatus
 
-pAssertionStep :: String -> TextParser AssertionLog
+pAssertionStep :: VerifyType -> TextParser AssertionLog
 pAssertionStep verifyType = do
     step <- pCheck "Checking assertions in step"
     return (AssertionStep verifyType step)
 
-pAssertionFail :: String -> TextParser AssertionLog
+pAssertionFail :: VerifyType -> TextParser AssertionLog
 pAssertionFail verifyType = do
     (entity, property) <- pAssertionFailed
     return (AssertionFail verifyType entity property)
 
 --INSERIR PATH
-pAssertionVCD :: String -> String -> TextParser AssertionLog
+pAssertionVCD :: VerifyType -> String -> TextParser AssertionLog
 pAssertionVCD verifyType path = do
     AssertionVCD verifyType <$> pWritingVCD
 
