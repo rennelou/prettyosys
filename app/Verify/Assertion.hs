@@ -1,5 +1,6 @@
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# HLINT ignore "Use tuple-section" #-}
+{-# HLINT ignore "Redundant bracket" #-}
 module Verify.Assertion (
     Assertion(..),
     getCoverAssertion,
@@ -52,39 +53,27 @@ getInductionAssertion :: FilePath -> BL.ByteString -> [(String, Assertion)]
 getInductionAssertion workdir =
     insertTag (show Induction) . toAssertionSingleton . mapAssertionLogsToAssertion Induction . getAssertionLogs workdir . T.decodeUtf8 . B.concat . BL.toChunks
 
-mapAssertionLogsToAssertion :: VerifyType -> [AssertionLog] -> Assertion
-mapAssertionLogsToAssertion verifyType = mapToAssertion nextState
-    where
-        nextState :: Assertion -> AssertionLog -> Assertion
-        nextState assertion@(Assertion _ step name trace) (AssertionStatus _verifyType passed) =
-            if verifyType == _verifyType then
-              Assertion (statusToBool passed) step name trace
-            else
-              assertion
+mapAssertionLogsToAssertion :: VerifyType -> [(VerifyType, AssertionLog)] -> Assertion
+mapAssertionLogsToAssertion verifyType = mapToAssertion . filterByVerifyType verifyType
 
-        nextState assertion@(Assertion passed _ name trace) (AssertionStep _verifyType step) =
-            if verifyType == _verifyType then
-              Assertion passed step name trace
-            else
-              assertion
+mapToAssertion :: [AssertionLog] -> Assertion
+mapToAssertion = foldl nextState (Assertion False 0 Nothing Nothing)
 
-        nextState assertion@(Assertion passed step _ trace) (AssertionFail _verifyType _ name) =
-            if verifyType == _verifyType then
-              Assertion passed step (Just name) trace
-            else
-              assertion
+filterByVerifyType :: VerifyType -> [(VerifyType, AssertionLog)] -> [AssertionLog]
+filterByVerifyType verifyType = map snd . (filter (\ (_verifyType, _) -> _verifyType == verifyType))
 
-        nextState assertion@(Assertion passed step name _) (AssertionVCD _verifyType trace) =
-            if verifyType == _verifyType then
-              Assertion passed step name (Just trace)
-            else
-              assertion
+nextState :: Assertion -> AssertionLog -> Assertion
+nextState assertion@(Assertion _ step name trace) (AssertionStatus passed) =
+      Assertion (statusToBool passed) step name trace
+nextState assertion@(Assertion passed _ name trace) (AssertionStep step) =
+      Assertion passed step name trace
+nextState assertion@(Assertion passed step _ trace) (AssertionFail _ name) =
+      Assertion passed step (Just name) trace
+nextState assertion@(Assertion passed step name _) (AssertionVCD trace) =
+      Assertion passed step name (Just trace)
 
 insertTag :: String -> [Assertion] -> [(String, Assertion)]
 insertTag tag = map (\ a -> (tag, a))
-
-mapToAssertion :: (Assertion -> a -> Assertion) -> [a] -> Assertion
-mapToAssertion nextState = foldl nextState (Assertion False 0 Nothing Nothing)
 
 toAssertionSingleton :: Assertion -> [Assertion]
 toAssertionSingleton (Assertion False 0 Nothing Nothing) = []
