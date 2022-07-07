@@ -10,7 +10,7 @@ import RTL.RTL
 import Control.Monad
 import Options.Applicative
 
-data Options = Options {
+newtype Options = Options {
     optCommand :: Command
 }
 
@@ -25,5 +25,5 @@ runApp = join $ execParser
 
 opts :: Parser (IO ())
 opts = hsubparser 
-    (  command "verify" (info (verifyAll <$> parseVerifyArgs) (progDesc "Execute formal verification") )
+    (  command "verify" (info (runVerification <$> parseVerifyArgs) (progDesc "Execute formal verification") )
     <> command "rtl" (info (generateRTL <$> parseRTLArgs) (progDesc "Generate RTL") ) )

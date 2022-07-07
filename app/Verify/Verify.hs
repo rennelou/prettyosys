@@ -2,27 +2,14 @@
 module Verify.Verify (
     VerifyArgs(..),
     Mode(..),
-    verifyAll
+    runVerification
 ) where
 
-import System.IO
 import System.Directory
-import System.Process.Typed
-import Control.Monad
 import qualified Data.Text as T
-import qualified Data.Text.Encoding as T
-import qualified Data.Text.IO as T
-import qualified Data.ByteString as B
-import qualified Data.ByteString.Lazy as BL
 
-import Verify.Commands as Commands
+import Verify.Commands
 import Verify.Sby
-import Verify.Types.CoverPoint
-import Verify.Types.Assertion
-import Verify.Types.Error
-import Verify.View.CoverTable
-import Verify.View.AssertionTable
-import Utils.FileExtensionSearch
 
 data VerifyArgs = VerifyArgs {
         getMode :: Mode,
@@ -33,69 +20,33 @@ data VerifyArgs = VerifyArgs {
         getDepht :: Int
     } deriving (Show);
 
-verifyAll :: VerifyArgs -> IO ()
-verifyAll args = do
+runVerification :: VerifyArgs -> IO ()
+runVerification args = do
+    let toplevel = getTopLevel args
+    let depht = getDepht args
+    let workdir = getWorkDir args
+    let replaceFlag = getReplaceFlag args
+    let mode = getMode args
+    let backupFlag = getBackupFlag args
 
-    sbys <- getSbys (getTopLevel args) (getDepht args) "src" "verification_units"
+    sbyConfigFiles <- createSymbiosysConfigFiles toplevel depht "src" "verification_units"
 
-    createDirectoryIfMissing True (getWorkDir args)
-    setCurrentDirectory (getWorkDir args)
+    createDirectoryIfMissing True workdir
+    setCurrentDirectory workdir
 
-    verifications <-
-        mapM
-            (\ sby -> do
+    mapM_
+        (\ sbyConfigFile -> do
+            
+            removeOldDirectoriesWhen replaceFlag toplevel
+            
+            putStrLn $ "\n\t\t\t" ++ toplevel ++ " verification"
+            
+            putStrLn $ "\n" ++ " linting " ++ toplevel ++ "...\n"
+            lint sbyConfigFile
+            
+            putStrLn $ "\n" ++ " verifing " ++ toplevel ++ "...\n"
+            sbyLog <- verify mode backupFlag toplevel sbyConfigFile
 
-                removeOldDirectoriesWhenHolds (getReplaceFlag args) (topLevel sby)
-
-                putStrLn $ "\n\t\t\t" ++ topLevel sby ++ " verification"
-
-                putStrLn $ "\n" ++ " linting " ++ topLevel sby ++ "...\n"
-                callCommand $ yosysLint sby
-
-                putStrLn $ "\n" ++ " verifing " ++ topLevel sby ++ "...\n"
-                verify args sby
-            )
-            sbys
-
-    return ()
-
-verify :: VerifyArgs -> Sby -> IO ()
-verify args sby = do
-
-    let symbiyosys' = Commands.symbiyosys (SbyCommandArgs (getMode args) (getBackupFlag args))
-    out <- (readCommand . symbiyosys') sby
-    prettyPrint out
-
-  where
-    prettyPrint :: BL.ByteString -> IO ()
-    prettyPrint out = do
-      let workdir = getWorkDir args
-      let log = (T.decodeUtf8 . B.concat . BL.toChunks) out
-
-      putStrLn "\n\t\t\tCover Points\n"
-
-      putStrLn $ createCoverTable $ getCoverPoints workdir log
-
-      putStrLn "\n\t\t\tAssertions\n"
-      putStrLn $ createAssertionTable
-          (  getCoverAssertion     workdir log
-          ++ getBasecaseAssertion  workdir log
-          ++ getInductionAssertion workdir log )
-
-      putStrLn $ getError workdir log
-      putStrLn "\n"
-
-readCommand :: String -> IO BL.ByteString
-readCommand command = do
-  (_, out, _) <- readProcess $ shell command
-  return out
-
-callCommand :: String -> IO ()
-callCommand = runProcess_ . shell
-
-removeOldDirectoriesWhenHolds :: Bool -> String -> IO ()
-removeOldDirectoriesWhenHolds flag topLevel =
-    when flag (do
-      tryRemoveDirectory (topLevel ++ "_cover")
-      tryRemoveDirectory (topLevel ++ "_prove")
-      return ())
+            prettyPrint workdir sbyLog
+        )
+        sbyConfigFiles
