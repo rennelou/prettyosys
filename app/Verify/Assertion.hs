@@ -28,95 +28,67 @@ getCoverAssertion :: FilePath -> BL.ByteString -> [(String, Assertion)]
 getCoverAssertion workdir =
     insertTag "Cover" . mapCoverToAssertion . getCoverLogs workdir . T.decodeUtf8 . B.concat . BL.toChunks
 
-mapCoverToAssertion :: [Cover] -> [Assertion]
+mapCoverToAssertion :: [CoverLog] -> [Assertion]
 mapCoverToAssertion = map toAssertion . getValidCoverEvents
   where
-      toAssertion :: Cover -> Assertion
-      toAssertion (CoverAssertFailed entity name step) =
+      toAssertion :: CoverLog -> Assertion
+      toAssertion (CoverPointFail entity name step) =
         Assertion False step (Just name) Nothing
 
       toAssertion _ = error "Error converting Cover to Assertion"
 
-      getValidCoverEvents :: [Cover] -> [Cover]
+      getValidCoverEvents :: [CoverLog] -> [CoverLog]
       getValidCoverEvents = filter isCoverValid
         where
-          isCoverValid :: Cover -> Bool
-          isCoverValid CoverAssertFailed {} = True
+          isCoverValid :: CoverLog -> Bool
+          isCoverValid CoverPointFail {} = True
           isCoverValid _ = False
 
 getBasecaseAssertion :: FilePath -> BL.ByteString -> [(String, Assertion)]
 getBasecaseAssertion workdir =
-    insertTag "Basecase" . toAssertionSingleton. mapBasecaseToAssertion . getBasecaseLogs workdir . T.decodeUtf8 . B.concat . BL.toChunks
+    insertTag "Basecase" . toAssertionSingleton. mapAssertionLogsToAssertion "basecase" . getAssertionLogs workdir . T.decodeUtf8 . B.concat . BL.toChunks
 
 getInductionAssertion :: FilePath -> BL.ByteString -> [(String, Assertion)]
 getInductionAssertion workdir =
-    insertTag "Induction" . toAssertionSingleton . mapInductionToAssertion . getInductionLogs workdir . T.decodeUtf8 . B.concat . BL.toChunks
+    insertTag "Induction" . toAssertionSingleton . mapAssertionLogsToAssertion "induction" . getAssertionLogs workdir . T.decodeUtf8 . B.concat . BL.toChunks
 
-mapBasecaseToAssertion :: [Basecase] -> Assertion
-mapBasecaseToAssertion = mapToAssertion nextState . getValidBasecaseEvents
+mapAssertionLogsToAssertion :: String -> [AssertionLog] -> Assertion
+mapAssertionLogsToAssertion verifyType = mapToAssertion nextState
     where
-        nextState :: Assertion -> Basecase -> Assertion
-        nextState (Assertion _ step name trace) (BasecaseStatus passed) =
-            Assertion (statusToBool passed) step name trace
+        nextState :: Assertion -> AssertionLog -> Assertion
+        nextState assertion@(Assertion _ step name trace) (AssertionStatus _verifyType passed) =
+            if verifyType == _verifyType then
+              Assertion (statusToBool passed) step name trace
+            else
+              assertion
 
-        nextState (Assertion passed _ name trace) (AssertionStep step) =
-            Assertion passed step name trace
+        nextState assertion@(Assertion passed _ name trace) (AssertionStep _verifyType step) =
+            if verifyType == _verifyType then
+              Assertion passed step name trace
+            else
+              assertion
 
-        nextState (Assertion passed step _ trace) (BasecaseFailed _ name) =
-            Assertion passed step (Just name) trace
+        nextState assertion@(Assertion passed step _ trace) (AssertionFail _verifyType _ name) =
+            if verifyType == _verifyType then
+              Assertion passed step (Just name) trace
+            else
+              assertion
 
-        nextState (Assertion passed step name _) (BasecaseWritingVCD trace) =
-            Assertion passed step name (Just trace)
-
-        nextState _ _ = error "error creating assertion"
-
-        getValidBasecaseEvents :: [Basecase] -> [Basecase]
-        getValidBasecaseEvents = filter isBasecaseValid
-            where
-                isBasecaseValid :: Basecase -> Bool
-                isBasecaseValid (BasecaseStatus _) = True
-                isBasecaseValid (AssertionStep _) = True
-                isBasecaseValid (BasecaseFailed _ _) = True
-                isBasecaseValid (BasecaseWritingVCD _) = True
-                isBasecaseValid _ = False
-
-mapInductionToAssertion :: [Induction] -> Assertion
-mapInductionToAssertion = mapToAssertion nextState . getValidInductionEvents
-    where
-        nextState :: Assertion -> Induction -> Assertion
-        nextState (Assertion _ step name trace) (InductionStatus passed) =
-            Assertion (statusToBool passed) step name trace
-
-        nextState (Assertion passed _ name trace) (InductionStep step) =
-            Assertion passed step name trace
-
-        nextState (Assertion passed step _ trace) (IndutionAssertFaild _ name) =
-            Assertion passed step (Just name) trace
-
-        nextState (Assertion passed step name _) (InductionWritingVCD trace) =
-            Assertion passed step name (Just trace)
-
-        nextState _ _ = error "error creating assertion"
-
-        getValidInductionEvents :: [Induction] -> [Induction]
-        getValidInductionEvents = filter isInductionValid
-            where
-                isInductionValid :: Induction -> Bool
-                isInductionValid (InductionStatus _) = True
-                isInductionValid (InductionStep _) = True
-                isInductionValid (IndutionAssertFaild _ _) = True
-                isInductionValid (InductionWritingVCD _) = True
-                isInductionValid _ = False
+        nextState assertion@(Assertion passed step name _) (AssertionVCD _verifyType trace) =
+            if verifyType == _verifyType then
+              Assertion passed step name (Just trace)
+            else
+              assertion
 
 insertTag :: String -> [Assertion] -> [(String, Assertion)]
 insertTag tag = map (\ a -> (tag, a))
 
+mapToAssertion :: (Assertion -> a -> Assertion) -> [a] -> Assertion
+mapToAssertion nextState = foldl nextState (Assertion False 0 Nothing Nothing)
+
 toAssertionSingleton :: Assertion -> [Assertion]
 toAssertionSingleton (Assertion False 0 Nothing Nothing) = []
 toAssertionSingleton a = [a]
-
-mapToAssertion :: (Assertion -> a -> Assertion) -> [a] -> Assertion
-mapToAssertion nextState = foldl nextState (Assertion False 0 Nothing Nothing)
 
 statusToBool :: String -> Bool
 statusToBool "passed" = True

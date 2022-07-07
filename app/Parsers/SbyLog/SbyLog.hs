@@ -2,19 +2,16 @@
 
 module Parsers.SbyLog.SbyLog (
     getCoverLogs,
-    getBasecaseLogs,
-    getInductionLogs,
+    getAssertionLogs,
     getErrorLogs,
     pSbyLog,
     SbyLog(..),
-    Cover(..),
-    Basecase(..),
-    Induction(..)
+    CoverLog(..),
+    AssertionLog(..)
 ) where
 
 import System.FilePath
 import Parsers.SbyLog.Utils
-import Parsers.SbyLog.LogType.LogType
 import Control.Monad
 import Data.Maybe
 import Data.Text (Text)
@@ -25,45 +22,51 @@ import qualified Data.Text as T
 import qualified Text.Megaparsec.Char.Lexer as L
 import qualified Text.Megaparsec as M
 import Parsers.TextParser
+import Verify.Sby (Sby)
 
 data SbyLog =
-      SbyLogLine { taskPath :: String, logline :: LogType }
+      SbyLogLine LogLine
+    | AnyLine
     | Error String deriving (Show)
 
-getCoverLogs :: FilePath -> Text -> [Cover]
+data LogLine = 
+      CoverLine CoverLog
+    | AssertionLine AssertionLog deriving (Show)
+
+data CoverLog = 
+      CoverpointReached String Integer
+    | CoverpointUnreachd String
+    | CoverpointVCD String 
+    | CoverPointFail String String Integer deriving (Show)
+
+data AssertionLog =
+      AssertionStatus String String
+    | AssertionStep String Integer
+    | AssertionFail String String String
+    | AssertionVCD String String deriving (Show)
+
+getCoverLogs :: FilePath -> Text -> [CoverLog]
 getCoverLogs currentDirectory = mapMaybe getCover . parseLogs
-    where
-        getCover :: SbyLog -> Maybe Cover
-        getCover SbyLogLine { taskPath=path, logline=(SolverType (CoverLog (WritingCoverVCD trace))) } =
-            Just (WritingCoverVCD (currentDirectory </> path </> trace))
-        getCover SbyLogLine { taskPath=_, logline=(SolverType (CoverLog cover)) } = Just cover
-        getCover _ = Nothing
+    
+getCover :: SbyLog -> Maybe CoverLog
+getCover (SbyLogLine (CoverLine cover)) = Just cover
+getCover _ = Nothing
 
-getBasecaseLogs :: FilePath -> Text -> [Basecase]
-getBasecaseLogs currentDirectory = mapMaybe getBaseCase . parseLogs
-    where
-        getBaseCase :: SbyLog -> Maybe Basecase
-        getBaseCase SbyLogLine { taskPath=path, logline=(SolverType (BasecaseLog (BasecaseWritingVCD trace))) } =
-            Just (BasecaseWritingVCD (currentDirectory </> path </> trace))
-        getBaseCase  SbyLogLine { taskPath=_, logline=(SolverType (BasecaseLog basecase)) } = Just basecase
-        getBaseCase _ = Nothing
 
-getInductionLogs :: FilePath -> Text -> [Induction]
-getInductionLogs currentDirectory = mapMaybe getInduction . parseLogs
-    where
-        getInduction :: SbyLog -> Maybe Induction
-        getInduction SbyLogLine { taskPath=path, logline=(SolverType (InductionLog (InductionWritingVCD trace))) } =
-            Just (InductionWritingVCD (currentDirectory </> path </> trace))
-        getInduction SbyLogLine { taskPath=_, logline=(SolverType (InductionLog induction)) } =
-            Just induction
-        getInduction _ = Nothing
+getAssertionLogs :: FilePath -> Text -> [AssertionLog]
+getAssertionLogs currentDirectory = mapMaybe getAssertion . parseLogs
+
+getAssertion :: SbyLog -> Maybe AssertionLog
+getAssertion (SbyLogLine (AssertionLine assertion)) = Just assertion
+getAssertion _ = Nothing
+
 
 getErrorLogs :: Text -> [String]
 getErrorLogs = mapMaybe errorFilter . parseLogs
-    where
-        errorFilter :: SbyLog -> Maybe String
-        errorFilter (Error error) = Just error
-        errorFilter _ = Nothing
+
+errorFilter :: SbyLog -> Maybe String
+errorFilter (Error error) = Just error
+errorFilter _ = Nothing
 
 parseLogs :: Text -> [SbyLog]
 parseLogs logTxt =
@@ -80,7 +83,104 @@ pSbyLog =
 pSbyLogLine :: TextParser SbyLog
 pSbyLogLine = do
     path <- pSbyHeader
-    SbyLogLine path <$> pLogType
+    choice [
+      try (SbyLogLine <$> pLogLine path),
+      pAnyLine ]
+    
+
+pLogLine :: String -> TextParser LogLine
+pLogLine path = do 
+    choice [
+        CoverLine     <$> pCover path,
+        AssertionLine <$> pAssertion path ]
+
+pCover :: String -> TextParser CoverLog
+pCover path = do
+    _ <- pEngineCover
+    lexeme (
+        choice [
+            pCoverpointReached,
+            pCoverpointUnreachd,
+            pCoverpointVCD path,
+            pCoverPointFail
+        ] )
+
+pEngineCover :: TextParser ()
+pEngineCover = do
+    _ <- pKeyword "engine_0: ##"
+    _ <- pHour
+    return ()
+
+pCoverpointReached :: TextParser CoverLog
+pCoverpointReached = do
+    _ <- pKeyword "Reached cover statement at"
+    coverPoint <- pProperty
+    _ <- pKeyword "in step"
+    step <- integer
+    _ <- pKeyword "."
+    return (CoverpointReached coverPoint step)
+
+pCoverpointUnreachd :: TextParser CoverLog
+pCoverpointUnreachd = do
+    _ <- pKeyword "Unreached cover statement at"
+    CoverpointUnreachd <$> pProperty
+
+-- INSERIR PATH
+pCoverpointVCD :: String -> TextParser CoverLog
+pCoverpointVCD path = do
+    CoverpointVCD <$> pWritingVCD
+
+pCoverPointFail :: TextParser CoverLog
+pCoverPointFail = do
+    _ <- pKeyword "Assert failed in"
+    entity <- pEntity
+    _ <- pCharsc ':'
+    property <- pProperty
+    _ <- pCharsc '('
+    _ <- pKeyword "step"
+    step <- integer
+    _ <- pCharsc ')'
+    return (CoverPointFail entity property step)
+
+
+
+pAssertion :: String -> TextParser AssertionLog
+pAssertion path = do
+    verifyType <- pEngineAssertion
+    lexeme (
+        choice [
+            pAssertionStatus verifyType,
+            pAssertionStep verifyType,
+            pAssertionFail verifyType,
+            pAssertionVCD verifyType path
+        ] )
+
+pEngineAssertion :: TextParser String
+pEngineAssertion = do
+    _ <- pKeyword "engine_0."
+    verifyType <- T.unpack <$> pWord
+    _ <- pKeyword ": ##"
+    _ <- pHour
+    return verifyType
+
+pAssertionStatus :: String -> TextParser AssertionLog
+pAssertionStatus verifyType = do
+    AssertionStatus verifyType <$> pStatus
+
+pAssertionStep :: String -> TextParser AssertionLog
+pAssertionStep verifyType = do
+    step <- pCheck "Checking assertions in step"
+    return (AssertionStep verifyType step)
+
+pAssertionFail :: String -> TextParser AssertionLog
+pAssertionFail verifyType = do
+    (entity, property) <- pAssertionFailed
+    return (AssertionFail verifyType entity property)
+
+--INSERIR PATH
+pAssertionVCD :: String -> String -> TextParser AssertionLog
+pAssertionVCD verifyType path = do
+    AssertionVCD verifyType <$> pWritingVCD
 
 pSbyHeader :: TextParser String
 pSbyHeader = do
@@ -92,3 +192,9 @@ pError :: TextParser SbyLog
 pError = do
     _ <- pKeyword "ERROR:"
     Error <$> (pAnything <* char '\n')
+
+pAnyLine :: TextParser SbyLog
+pAnyLine = AnyLine <$ lexeme pLine
+
+pLine :: TextParser String
+pLine = pAnything <* char '\n'
