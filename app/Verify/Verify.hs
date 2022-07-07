@@ -5,26 +5,24 @@ module Verify.Verify (
     verifyAll
 ) where
 
-import Verify.Commands as Commands
-import Verify.Sby
-import Verify.Types.CoverPoint
-import Verify.Types.Assertion
-import Verify.Types.Error
-
-import Utils.FileExtensionSearch
-
-import View.CoverTable
-import View.AssertionTable
+import System.IO
+import System.Directory
+import System.Process.Typed
+import Control.Monad
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as T
 import qualified Data.Text.IO as T
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Lazy as BL
 
-import System.IO
-import System.Directory
-import System.Process.Typed
-import Control.Monad
+import Verify.Commands as Commands
+import Verify.Sby
+import Verify.Types.CoverPoint
+import Verify.Types.Assertion
+import Verify.Types.Error
+import Verify.View.CoverTable
+import Verify.View.AssertionTable
+import Utils.FileExtensionSearch
 
 data VerifyArgs = VerifyArgs {
         getMode :: Mode,

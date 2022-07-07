@@ -1,4 +1,4 @@
-module View.Utils (
+module Verify.View.Utils (
     green,
     red
 ) where

@@ -1,11 +1,12 @@
-module View.AssertionTable (
+module Verify.View.AssertionTable (
     createAssertionTable
 ) where
 
-import Verify.Types.Assertion
-import View.Utils
 import Text.Layout.Table
 import Text.Layout.Table.Cell.Formatted
+
+import Verify.Types.Assertion
+import Verify.View.Utils
 
 createAssertionTable :: [(String, Assertion)] -> String
 createAssertionTable [] = "Error Executing Prove Task"

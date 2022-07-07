@@ -1,11 +1,12 @@
-module View.CoverTable (
+module Verify.View.CoverTable (
     createCoverTable
 ) where
 
-import Verify.Types.CoverPoint
-import View.Utils
 import Text.Layout.Table
 import Text.Layout.Table.Cell.Formatted
+
+import Verify.Types.CoverPoint
+import Verify.View.Utils
 
 createCoverTable :: [CoverPoint] -> String
 createCoverTable [] = "Error executing Cover Task"
