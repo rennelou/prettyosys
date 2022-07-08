@@ -4,6 +4,7 @@ module Init.Init (
 ) where
 
 import System.IO
+import System.Directory
 import qualified Data.Text as T 
 
 import Settings.Settings
@@ -16,7 +17,9 @@ data InitArgs = InitArgs {
 }
 
 initProject :: InitArgs -> IO ()
-initProject initArgs = 
+initProject initArgs = do
+  createDirectoryIfMissing True (srcDirArg initArgs)
+  createDirectoryIfMissing True (vunitsDirArgs initArgs)
   writeFile settingsFilename (T.unpack $ createSettings (convertToSettings initArgs)) 
 
 convertToSettings :: InitArgs -> Settings
