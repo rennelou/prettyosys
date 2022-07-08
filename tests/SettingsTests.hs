@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module SettingsTests (
   settingsTests
 ) where
@@ -13,7 +15,7 @@ import qualified Data.Text.IO as TIO
 import Settings.Settings
 
 settingsTests :: TestTree
-settingsTests = testGroup "Settings Tests" [getSettingsTest]
+settingsTests = testGroup "Settings Tests" [getSettingsTest, createSettingsTest]
 
 getSettingsTest :: TestTree
 getSettingsTest =
@@ -23,5 +25,12 @@ getSettingsTest =
             ++  "srcdir    = \"src\"\n"
             ++  "vunitsdir = \"verification_units\"\n"
             ++  "depht     = 50\n"
-      TIO.putStrLn $ Toml.encode settingsCodec settings
+      return ()
+    )
+
+createSettingsTest :: TestTree
+createSettingsTest = 
+  testCase "Create Settings" ( do
+      let settings = Settings "Verify_build" "src" "verification_units" 50
+      TIO.putStrLn $ createSettings settings
     )

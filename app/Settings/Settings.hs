@@ -1,10 +1,9 @@
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Settings.Settings (
   Settings(..),
   getSettings,
-  settingsCodec
+  createSettings
 ) where
 
 import Control.Applicative ((<|>))
@@ -33,6 +32,9 @@ getSettings s =
   case Toml.decode settingsCodec s of
     Left  err      -> error $ T.unpack (Toml.prettyTomlDecodeErrors err)
     Right settings -> settings
+
+createSettings :: Settings -> Text
+createSettings = Toml.encode settingsCodec
 
 settingsCodec :: TomlCodec Settings
 settingsCodec = Settings
