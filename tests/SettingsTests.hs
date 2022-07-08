@@ -19,25 +19,9 @@ getSettingsTest :: TestTree
 getSettingsTest =
   testCase  "Get Settings" ( do
       let settings = getSettings . T.pack
-            $   "server.port        = 8080\n"
-            ++  "server.codes       = [ 5, 10, 42 ]\n"
-            ++  "server.description = \"\"\"\n"
-            ++  "This is production server.\n"
-            ++  "Don't touch it!\n"
-            ++  "\"\"\"\n"
-            ++  "\n"
-            ++  "[mail]\n"
-            ++  "host = \"smtp.gmail.com\"\n"
-            ++  "send-if-inactive = false\n"
-            ++  "\n"
-            ++  "[[user]]\n"
-            ++  "guestId = 42\n"
-            ++  "\n"
-            ++  "[[user]]\n"
-            ++  "guestId = 114\n"
-            ++  "\n"
-            ++  "[[user]]\n"
-            ++  "login = \"Foo Bar\"\n"
-            ++  "createdAt = 2020-05-19\n"
+            $   "workdir   = \"verify_build\"\n"
+            ++  "srcdir    = \"src\"\n"
+            ++  "vunitsdir = \"verification_units\"\n"
+            ++  "depht     = 50\n"
       TIO.putStrLn $ Toml.encode settingsCodec settings
     )
