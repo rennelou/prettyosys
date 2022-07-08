@@ -64,9 +64,10 @@ executable prettyosys
 
 Test-Suite test
     type:          exitcode-stdio-1.0
-    main-is:       Test.hs
+    main-is:       Spec.hs
     
-    other-modules: Cli.RunApp,
+    other-modules: ParserTests,
+                   Cli.RunApp,
                    Cli.VerifyArgs,
                    Cli.RTLArgs,
                    Cli.Utils,

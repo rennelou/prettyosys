@@ -1,3 +1,7 @@
+module ParserTests (
+  parseTests
+) where
+
 import Test.Tasty
 import Test.Tasty.SmallCheck as SC
 import Test.Tasty.QuickCheck as QC
@@ -10,21 +14,15 @@ import Utils.Parsers.SbyLog
 import Utils.Parsers.PSL
 import Data.Void
 
-main :: IO ()
-main = defaultMain tests
-
-tests :: TestTree
-tests = testGroup "Tests" [unitTests]
-
-unitTests :: TestTree
-unitTests = testGroup "Unit Tests" [sbyLogTests, pslLogTests, assertionParseTest]
+parseTests :: TestTree
+parseTests = testGroup "Parser Tests" [sbyLogTests, pslLogTests, assertionParseTest]
 
 sbyLogTests :: TestTree
-sbyLogTests = testGroup "Sby Log Parser Tests" [coverSbyLogTest, proveSbyLogTest]
+sbyLogTests = testGroup "Sby Log" [coverSbyLogTest, proveSbyLogTest]
 
 coverSbyLogTest :: TestTree
 coverSbyLogTest =
-  testCase  "Cover Sby Log Parse"
+  testCase  "Cover"
   $ assertParser (pSbyLog "") . T.pack
   $    "SBY 18:50:12 [ram_cover] Copy '/mnt/c/git/atg.mdadapter/src/mocks/memory_mock.vhd' to '/mnt/c/git/atg.mdadapter/verify_build/ram_cover/src/memory_mock.vhd'.\n"
     ++ "SBY 18:50:13 [ram_cover] engine_0: smtbmc\n"
@@ -51,7 +49,7 @@ coverSbyLogTest =
 
 proveSbyLogTest :: TestTree
 proveSbyLogTest =
-  testCase "Prove Sby Log Parse"
+  testCase "Prove"
   $ assertParser (pSbyLog "") . T.pack
   $    "SBY 18:50:13 [ram_prove] Copy '/mnt/c/git/atg.mdadapter/src/mocks/memory_mock.vhd' to '/mnt/c/git/atg.mdadapter/verify_build/ram_prove/src/memory_mock.vhd'.\n"
     ++ "SBY 18:50:13 [ram_prove] engine_0: smtbmc\n"
@@ -88,11 +86,11 @@ assertionParseTest =
   $  "engine_0.basecase: ##   0:00:00  Checking assertions in step 0..\n"
 
 pslLogTests :: TestTree
-pslLogTests = testGroup "PSL Parser Tests" [pslTest]
+pslLogTests = testGroup "PSL Parser" [pslTest]
 
 pslTest :: TestTree
 pslTest =
-  testCase "PSL Parse"
+  testCase "PSL"
   $ assertParser pPSL . T.pack
   $    "vunit linked_list_vu(linked_list(linked_list_rtl))\n"
     ++ "{\n"
