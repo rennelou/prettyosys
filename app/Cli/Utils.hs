@@ -1,13 +1,21 @@
 module Cli.Utils (
-    parseWorkDir
+    parseWorkDir,
+    parseDepht
 ) where
 
 import Options.Applicative
 
 parseWorkDir :: Parser String
 parseWorkDir = strOption
-    (  long "workdir"
-    <> short 'w'
-    <> showDefault
-    <> value "verify_build"
-    <> help "Work Directory")
+  (  long "workdir"
+  <> short 'w'
+  <> value ""
+  <> help "Work Directory")
+
+parseDepht :: Parser Int
+parseDepht = option auto
+  (  long "depht"
+  <> short 'd'
+  <> showDefault
+  <> value 20
+  <> help "Number of cycles of stimuli" )

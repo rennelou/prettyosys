@@ -32,5 +32,6 @@ createSettingsTest :: TestTree
 createSettingsTest = 
   testCase "Create Settings" ( do
       let settings = Settings "Verify_build" "src" "verification_units" 50
-      TIO.putStrLn $ createSettings settings
+      let toml = createSettings settings
+      return ()
     )

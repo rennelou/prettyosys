@@ -16,11 +16,11 @@ import qualified Data.Text.IO as TIO
 import qualified Toml
 
 data Settings = Settings
-    { settingsWorkDir   :: !Text
-    , settingsSrcDir    :: !Text
-    , settingsVunitsDir :: !Text
-    , settingsDepht     :: !Int
-    }
+  { settingsWorkDir   :: !Text
+  , settingsSrcDir    :: !Text
+  , settingsVunitsDir :: !Text
+  , settingsDepht     :: !Int
+  }
 
 newtype WorkDir   = WorkDir Text
 newtype SrcDir    = SrcDir Text
@@ -38,7 +38,7 @@ createSettings = Toml.encode settingsCodec
 
 settingsCodec :: TomlCodec Settings
 settingsCodec = Settings
-    <$> Toml.text             "workdir"   .= settingsWorkDir
-    <*> Toml.text             "srcdir"    .= settingsSrcDir
-    <*> Toml.text             "vunitsdir" .= settingsVunitsDir
-    <*> Toml.diwrap (Toml.int "depht")    .= settingsDepht
+  <$> Toml.text             "workdir"   .= settingsWorkDir
+  <*> Toml.text             "srcdir"    .= settingsSrcDir
+  <*> Toml.text             "vunitsdir" .= settingsVunitsDir
+  <*> Toml.diwrap (Toml.int "depht")    .= settingsDepht

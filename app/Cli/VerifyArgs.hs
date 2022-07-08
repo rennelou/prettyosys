@@ -31,14 +31,6 @@ parseUUT = strOption
     <> value ""
     <> help "Unit under the test" )
 
-parseDepht :: Parser Int
-parseDepht = option auto
-    (  long "depht"
-    <> short 'd'
-    <> showDefault
-    <> value 20
-    <> help "Number of cycles of stimuli" )
-
 parseBackupFlag :: Parser Bool
 parseBackupFlag = switch
     (  long "backup"
