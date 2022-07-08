@@ -20,7 +20,7 @@ settingsTests = testGroup "Settings Tests" [getSettingsTest, createSettingsTest]
 getSettingsTest :: TestTree
 getSettingsTest =
   testCase  "Get Settings" ( do
-      let settings = getSettings . T.pack
+      let settings = decodeSettings
             $   "workdir   = \"verify_build\"\n"
             ++  "srcdir    = \"src\"\n"
             ++  "vunitsdir = \"verification_units\"\n"

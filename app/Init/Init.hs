@@ -4,6 +4,9 @@ module Init.Init (
 ) where
 
 import System.IO
+import qualified Data.Text as T 
+
+import Settings.Settings
 
 data InitArgs = InitArgs {
   workDirArg    :: String,
@@ -13,4 +16,13 @@ data InitArgs = InitArgs {
 }
 
 initProject :: InitArgs -> IO ()
-initProject initArgs = putStrLn "begin"
+initProject initArgs = 
+  writeFile settingsFilename (T.unpack $ createSettings (convertToSettings initArgs)) 
+
+convertToSettings :: InitArgs -> Settings
+convertToSettings initArgs = 
+  Settings 
+    (T.pack $ workDirArg initArgs)
+    (T.pack $ srcDirArg initArgs)
+    (T.pack $ vunitsDirArgs initArgs)
+    (dephtArg initArgs)

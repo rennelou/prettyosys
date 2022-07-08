@@ -10,6 +10,7 @@ import qualified Data.Text as T
 
 import Verify.Commands
 import Verify.SbyConfigFile
+import Settings.Settings
 
 data VerifyArgs = VerifyArgs {
         getMode :: Mode,
@@ -22,14 +23,24 @@ data VerifyArgs = VerifyArgs {
 
 runVerification :: VerifyArgs -> IO ()
 runVerification args = do
+    settings <- getSettings
+    
+    let workDirSettings = T.unpack $ settingsWorkDir settings
+    let srcDir = T.unpack $ settingsSrcDir settings
+    let vunitsDir = T.unpack $ settingsVunitsDir settings
+    let dephtSettings = settingsDepht settings
+
+    let workdirArgs = getWorkDir args
+    let dephtArgs = getDepht args
     let uut = getUUT args
-    let depht = getDepht args
-    let workdir = getWorkDir args
     let replaceFlag = getReplaceFlag args
     let mode = getMode args
     let backupFlag = getBackupFlag args
 
-    sbyConfigFiles <- createSymbiosysConfigFiles uut depht "src" "verification_units"
+    let workdir = ifDefaultGetOthers "" workdirArgs workDirSettings
+    let depht = ifDefaultGetOthers 0 dephtArgs dephtSettings
+
+    sbyConfigFiles <- createSymbiosysConfigFiles uut depht srcDir vunitsDir
 
     createDirectoryIfMissing True workdir
     setCurrentDirectory workdir
@@ -51,3 +62,10 @@ runVerification args = do
             prettyPrint workdir sbyLog
         )
         sbyConfigFiles
+
+ifDefaultGetOthers :: (Eq a) => a -> a -> a -> a
+ifDefaultGetOthers defaultValue value1 value2 =
+  if value1 /= defaultValue then
+    value1
+  else
+    value2

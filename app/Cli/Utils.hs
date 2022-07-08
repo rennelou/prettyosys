@@ -16,6 +16,5 @@ parseDepht :: Parser Int
 parseDepht = option auto
   (  long "depht"
   <> short 'd'
-  <> showDefault
-  <> value 20
+  <> value 0
   <> help "Number of cycles of stimuli" )

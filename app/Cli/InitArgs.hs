@@ -2,7 +2,6 @@ module Cli.InitArgs (
   parseInitArgs
 ) where
 
-import Cli.Utils
 import Init.Init
 import Options.Applicative
 
@@ -11,7 +10,7 @@ parseInitArgs = InitArgs
                <$> parseBeginWorkDir
                <*> parseSrcDir
                <*> parseVunitsDir
-               <*> parseDepht
+               <*> parseBeginDepht
 
 parseBeginWorkDir :: Parser String
 parseBeginWorkDir = strOption
@@ -36,3 +35,11 @@ parseVunitsDir = strOption
   <> showDefault
   <> value "vunits"
   <> help "Verification Units Directory")
+
+parseBeginDepht :: Parser Int
+parseBeginDepht = option auto
+  (  long "depht"
+  <> short 'd'
+  <> showDefault
+  <> value 20
+  <> help "Number of cycles of stimuli" )

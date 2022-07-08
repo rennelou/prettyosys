@@ -2,7 +2,9 @@
 
 module Settings.Settings (
   Settings(..),
+  settingsFilename,
   getSettings,
+  decodeSettings,
   createSettings
 ) where
 
@@ -27,9 +29,16 @@ newtype SrcDir    = SrcDir Text
 newtype VunitsDir = VunitsDir Text
 newtype Depht     = Depht Int
 
-getSettings :: Text -> Settings
-getSettings s =
-  case Toml.decode settingsCodec s of
+settingsFilename = "prettyosys.toml"
+
+getSettings :: IO Settings
+getSettings = do
+  settingsToml <- readFile settingsFilename
+  return (decodeSettings settingsToml)
+
+decodeSettings :: String -> Settings
+decodeSettings s =
+  case Toml.decode settingsCodec (T.pack s) of
     Left  err      -> error $ T.unpack (Toml.prettyTomlDecodeErrors err)
     Right settings -> settings
 
