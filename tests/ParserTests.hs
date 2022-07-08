@@ -15,10 +15,15 @@ import Utils.Parsers.PSL
 import Data.Void
 
 parseTests :: TestTree
-parseTests = testGroup "Parser Tests" [sbyLogTests, pslLogTests, assertionParseTest]
+parseTests = testGroup "Parser Tests" [sbyLogTests, pslLogTests]
 
 sbyLogTests :: TestTree
-sbyLogTests = testGroup "Sby Log" [coverSbyLogTest, proveSbyLogTest]
+sbyLogTests = testGroup "Sby Log" [coverSbyLogTest, proveSbyLogTest, assertionParseTest]
+
+pslLogTests :: TestTree
+pslLogTests = testGroup "PSL Parser" [pslTest]
+
+
 
 coverSbyLogTest :: TestTree
 coverSbyLogTest =
@@ -85,25 +90,25 @@ assertionParseTest =
   $  assertParser (pAssertion "" "") . T.pack 
   $  "engine_0.basecase: ##   0:00:00  Checking assertions in step 0..\n"
 
-pslLogTests :: TestTree
-pslLogTests = testGroup "PSL Parser" [pslTest]
+
+
 
 pslTest :: TestTree
 pslTest =
   testCase "PSL"
   $ assertParser pPSL . T.pack
-  $    "vunit linked_list_vu(linked_list(linked_list_rtl))\n"
-    ++ "{\n"
-    ++ "default clock is rising_edge(clk);\n"
-    ++ "\n"
-    ++ "assume rst = '1';\n"
-    ++ "\n"
-    ++ "attribute anyconst : boolean;\n"
-    ++ "\n"
-    ++ "signal any_value : std_logic_vector(CONTENT_SIZE - 1 downto 0);\n"
-    ++ "attribute anyconst of any_value : signal is true;\n"
-    ++ "assume any_value /= std_logic_vector(to_unsigned(0, CONTENT_SIZE));\n"
-    ++ "\n"
+  $     "vunit linked_list_vu(linked_list(linked_list_rtl))\n"
+    ++  "{\n"
+    ++  "default clock is rising_edge(clk);\n"
+    ++  "\n"
+    ++  "assume rst = '1';\n"
+    ++  "\n"
+    ++  "attribute anyconst : boolean;\n"
+    ++  "\n"
+    ++  "signal any_value : std_logic_vector(CONTENT_SIZE - 1 downto 0);\n"
+    ++  "attribute anyconst of any_value : signal is true;\n"
+    ++  "assume any_value /= std_logic_vector(to_unsigned(0, CONTENT_SIZE));\n"
+    ++  "\n"
     ++  "HAPPY_SHORTER_PATH : cover {\n"
     ++  "rst = '0' and done = '1' and start = '1' and opcode = append_command and new_value = any_value and new_node_address = any_address;\n"
     ++  "rst = '0' [+];\n"
