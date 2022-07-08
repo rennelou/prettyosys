@@ -91,7 +91,7 @@ getPropertySpecificationFiles srcPath vunitPath = do
       ( \ path -> do
         let fileName = takeFileName path
         text <- readFile path
-        let maybePslFile = parsePsl $ T.pack text
+        let maybePslFile = tryParsePsl $ T.pack text
         return (case maybePslFile of
           Just pslFile -> Just (PSLFile {getPsl=pslFile, getFilename =fileName, getPath=path})
           Nothing      -> Nothing ) )

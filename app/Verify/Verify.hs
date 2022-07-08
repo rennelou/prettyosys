@@ -37,8 +37,8 @@ runVerification args = do
     let mode = getMode args
     let backupFlag = getBackupFlag args
 
-    let workdir = ifDefaultGetOthers "" workdirArgs workDirSettings
-    let depht = ifDefaultGetOthers 0 dephtArgs dephtSettings
+    let workdir = ifDefaultGetAnother "" workdirArgs workDirSettings
+    let depht = ifDefaultGetAnother 0 dephtArgs dephtSettings
 
     sbyConfigFiles <- createSymbiosysConfigFiles uut depht srcDir vunitsDir
 
@@ -63,8 +63,8 @@ runVerification args = do
         )
         sbyConfigFiles
 
-ifDefaultGetOthers :: (Eq a) => a -> a -> a -> a
-ifDefaultGetOthers defaultValue value1 value2 =
+ifDefaultGetAnother :: (Eq a) => a -> a -> a -> a
+ifDefaultGetAnother defaultValue value1 value2 =
   if value1 /= defaultValue then
     value1
   else

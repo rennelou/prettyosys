@@ -3,7 +3,7 @@
 module Utils.Parsers.PSL (
     PSL(..),
     VunitType(..),
-    parsePsl,
+    tryParsePsl,
     pPSL,
     getTopLevel
 ) where
@@ -31,8 +31,8 @@ data VunitType = VUnit | VProp | VMode deriving(Show)
 getTopLevel :: PSL -> String
 getTopLevel psl = fst $ hdl psl
 
-parsePsl :: T.Text -> Maybe PSL
-parsePsl s =
+tryParsePsl :: T.Text -> Maybe PSL
+tryParsePsl s =
   case runParser pPSL "" s of
     Left  err -> Nothing
     Right psl -> Just psl
