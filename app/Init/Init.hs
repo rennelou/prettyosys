@@ -8,6 +8,7 @@ import System.Directory
 import qualified Data.Text as T 
 
 import Settings.Settings
+import System.FilePath ((</>))
 
 data InitArgs = InitArgs {
   workDirArg    :: String,
@@ -18,8 +19,14 @@ data InitArgs = InitArgs {
 
 initProject :: InitArgs -> IO ()
 initProject initArgs = do
-  createDirectoryIfMissing True (srcDirArg initArgs)
-  createDirectoryIfMissing True (vunitsDirArgs initArgs)
+  let srcDir = srcDirArg initArgs
+  createDirectoryIfMissing True srcDir
+  writeFile (srcDir </> counterRTLFilename) counterRTL
+
+  let vunitsDir = vunitsDirArgs initArgs
+  createDirectoryIfMissing True vunitsDir
+  writeFile (vunitsDir </> counterPropertiesFilename) counterProperties
+
   writeFile settingsFilename (T.unpack $ createSettings (convertToSettings initArgs)) 
 
 convertToSettings :: InitArgs -> Settings
