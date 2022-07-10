@@ -2,15 +2,64 @@
 
 <!---Esses são exemplos. Veja https://shields.io para outras pessoas ou para personalizar este conjunto de escudos. Você pode querer incluir dependências, status do projeto e informações de licença aqui--->
 
-![GitHub repo size](https://img.shields.io/github/repo-size/iuricode/README-template?style=for-the-badge)
-![GitHub language count](https://img.shields.io/github/languages/count/iuricode/README-template?style=for-the-badge)
-![GitHub forks](https://img.shields.io/github/forks/iuricode/README-template?style=for-the-badge)
-![Bitbucket open issues](https://img.shields.io/bitbucket/issues/iuricode/README-template?style=for-the-badge)
-![Bitbucket open pull requests](https://img.shields.io/bitbucket/pr-raw/iuricode/README-template?style=for-the-badge)
+
+
+> *Logic is the art of going wrong with confidence. -* Morris Kline
+> 
+
+---
 
 <img src="prettyosys_example.gif" alt="exemplo gif">
 
-> Linha adicional de texto informativo sobre o que o projeto faz. Sua introdução deve ter cerca de 2 ou 3 linhas. Não exagere, as pessoas não vão ler.
+The goal of prettyosys is that you just need the hardware description file in VHDL and the property specification file in PSL for verify your hardware. No need of configuration files for every hardware wich you want to verify. No need to descripte of where are your VHDL’s or PSL’s files, the prettyosys searchs recursively for your files in your project. Everything wich you need to do is write you hardware and properties and prettyosys take care of the rest.
+
+---
+
+## Instalation
+
+Prettyosys combine yosys, symbiyosys and ghdl to create a easy enviromment to fomal verify and sinthetize your hardware descriptions in VHDL. For now, this haven’t support for Verilog or SystemVerilog and only support Yices how formal verification tool. You need the ghdl-yosys-plugin to sintetize VHDL in yosys tool too.
+
+Pre requitsitos
+
+* yosys
+* ghdl
+* ghdl-yosys-plugin
+* symbiyosys
+* yices
+
+The easier way to get the requesiments is by **[oss-cad-suite-build](https://github.com/YosysHQ/oss-cad-suite-build)**
+
+### Compile
+
+To compile you need cabal haskell compiler, we recommend to get it by ghcup. When you have a cabal working follow these steps below:
+
+```bash
+git clone [git@github.com](mailto:git@github.com):rennelou/prettyosys.git
+
+cd prettyosys
+
+cabal build && cabal install
+```
+
+The prettyosys binary will be installed on $HOME/.cabal/bin, we recommend to add this path to yousr$PATH variable on .bashrc file.
+
+---
+
+## Getting Staterd
+
+To bootstrap a prettyosys project, everything you need to do is enter in a folder that you want your project and follow these steps below:
+
+```bash
+prettyosys init
+```
+
+You will see a prettyosys.toml file that contains the config about the project. A src folder with a counter.vhd file wich is the hardware example bootstraped and a vunits folder with counter.psl wich contains properties to formal verify the counter hardware example.
+
+```bash
+prettyosys verify
+```
+
+And that’s it! Go ahead and types your own projects
 
 ### Ajustes e melhorias
 
