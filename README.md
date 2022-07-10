@@ -19,7 +19,7 @@ The goal of prettyosys is that you just need the hardware description file in VH
 
 Prettyosys combine yosys, symbiyosys and ghdl to create a easy enviromment to fomal verify and sinthetize your hardware descriptions in VHDL. For now, this haven’t support for Verilog or SystemVerilog and only support Yices how formal verification tool. You need the ghdl-yosys-plugin to sintetize VHDL in yosys tool too.
 
-Pre requitsitos
+Requirements
 
 * yosys
 * ghdl
@@ -27,7 +27,7 @@ Pre requitsitos
 * symbiyosys
 * yices
 
-The easier way to get the requesiments is by **[oss-cad-suite-build](https://github.com/YosysHQ/oss-cad-suite-build)**
+The easier way to get the requirements is by **[oss-cad-suite-build](https://github.com/YosysHQ/oss-cad-suite-build)**
 
 ### Compile
 
